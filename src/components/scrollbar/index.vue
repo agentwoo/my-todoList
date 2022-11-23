@@ -1,9 +1,12 @@
 <!-- 列表组件  -->
 <script lang='ts' setup>
 import { reactive, ref } from 'vue'
-import { Delete, Edit, Comment } from '@element-plus/icons-vue'
+import { Delete, Edit } from '@element-plus/icons-vue'
 import { errMessage, successMessage, delDialog } from '../../utils'
 import { useTodoListStore } from '../../store/index'
+// 将语言改为中文
+import { ElConfigProvider } from 'element-plus'
+import zhCn from 'element-plus/dist/locale/zh-cn.mjs'
 
 
 const todoListStore = useTodoListStore()
@@ -13,15 +16,16 @@ interface ItodoList {
     text: string;
     finished: boolean;
     significant: boolean;
-    desc: string
+    desc: string;
+    deadLine: string;
+    createTime: string;
 }
 
 const data = reactive({
     showDialog: false,
     showDesDialog: false,
     currentItem: null as null | ItodoList,
-    form: { text: '' },
-    descFrom: { text: '' }
+    form: { text: '', desc: '', deadLine: '' }
 })
 
 type Props = {
@@ -45,46 +49,57 @@ async function delItem(item: ItodoList) {
 const editItem = (item: ItodoList) => {
     data.currentItem = item
     data.form.text = item.text
+    data.form.desc = item.desc
+    data.form.deadLine = item.deadLine
     data.showDialog = true
+
+    // todoListStore.editText = item.text
 }
+
+
+// 待办事项验证规则
+const validateText = (rule: any, value: string, callback: any) => {
+    const v = value.trim()
+    if (!v) return callback("待办项不能为空")
+    // if (todoListStore.editText === v) return callback(undefined)
+    if (data.currentItem?.text === v) return callback()
+    let isExist = todoListStore.todoList.some((i: { text: string; }) => i.text === v)
+    return callback(isExist ? '该待办项已存在' : undefined)
+}
+
+const rules = reactive({
+    text: [{ validator: validateText, trigger: 'blur' }]
+})
 
 // 确定修改
-const confirmEdit = () => {
-    let result = todoListStore.editItem(data.currentItem as ItodoList, data.form.text)
+let formRef = ref()
+async function confirmEdit() {
+    const $form = formRef.value
+    if (!$form) return
+    const valid = await $form.validate()
+    if (!valid) return
+
+    let result = todoListStore.editItem(data.currentItem as ItodoList, data.form)
     result ? successMessage('修改成功') : errMessage('修改失败')
     data.form.text = ''
+    data.form.desc = ''
     data.showDialog = false
 }
-
-// 添加备注
-const addDesc = (item: ItodoList) => {
-    data.currentItem = item
-    data.descFrom.text = item.desc
-    data.showDesDialog = true
-}
-// 确定修改备注
-const confirmAddDesc = () => {
-    let result = todoListStore.addDesc(data.currentItem as ItodoList, data.descFrom.text)
-    result ? successMessage('修改成功') : errMessage('修改失败')
-    data.descFrom.text = ''
-    data.showDesDialog = false
-}
-
 
 </script>
 
 <template>
     <div v-for="item in finishedOrunfinished" :key="item.id" class="scrollbar-demo-item">
-        <div :class="{ finishedText: item.finished, isDesc: item.desc }">
+        <div :class="{ finishedText: item.finished, isDesc: item.desc, isDeadLine: item.deadLine }">
             <div>
                 <el-checkbox v-model="item.finished" />
                 {{ item.text }}
             </div>
-            <div>{{ item.desc }}</div>
+            <div v-show="item.deadLine" style="font-size: 8px;">截止日期:{{ item.deadLine }}</div>
+            <div v-show="item.desc" style="font-size: 8px;">备注:{{ item.desc }}</div>
         </div>
         <div class="scrollbar-demo-item_right">
             <el-button text :icon="Edit" @click="editItem(item)" v-show="!item.finished">修改</el-button>
-            <el-button text :icon="Comment" @click="addDesc(item)">备注</el-button>
             <el-button text :icon="Delete" @click="delItem(item)">删除</el-button>
             <div @click="item.significant = !item.significant">
                 <el-icon v-if="!item.significant">
@@ -98,31 +113,25 @@ const confirmAddDesc = () => {
     </div>
     <!-- 修改弹窗 -->
     <el-dialog v-model="data.showDialog" title="提示">
-        <el-form :model="data.form">
-            <el-form-item label="修改当前待办事项" prop="text">
+        <el-form :model="data.form" label-width="90px" ref="formRef" :rules="rules">
+            <el-form-item label="修改事项:" prop="text" required>
                 <el-input v-model="data.form.text" autocomplete="off" />
+            </el-form-item>
+            <el-form-item label="添加描述:" prop="desc">
+                <el-input v-model="data.form.desc" autocomplete="off" />
+            </el-form-item>
+
+            <el-form-item label="截止日期:" prop="deadLine">
+                <el-config-provider :locale="zhCn">
+                    <el-date-picker v-model="data.form.deadLine" type="date" placeholder="选择日期" format="YYYY/MM/DD"
+                        value-format="YYYY-MM-DD" />
+                </el-config-provider>
             </el-form-item>
         </el-form>
         <template #footer>
             <span class="dialog-footer">
                 <el-button @click="data.showDialog = false">取消</el-button>
                 <el-button type="primary" @click="confirmEdit">
-                    确定
-                </el-button>
-            </span>
-        </template>
-    </el-dialog>
-    <!-- 添加备注 -->
-    <el-dialog v-model="data.showDesDialog" title="提示">
-        <el-form :model="data.descFrom">
-            <el-form-item label="添加描述" prop="text">
-                <el-input v-model="data.descFrom.text" autocomplete="off" />
-            </el-form-item>
-        </el-form>
-        <template #footer>
-            <span class="dialog-footer">
-                <el-button @click="data.showDesDialog = false">取消</el-button>
-                <el-button type="primary" @click="confirmAddDesc">
                     确定
                 </el-button>
             </span>
@@ -156,13 +165,14 @@ const confirmAddDesc = () => {
         color: gray;
     }
 
-    .isDesc {
+    .isDesc,
+    .isDeadLine {
         display: flex;
         flex-direction: column;
 
         div {
             display: flex;
-            align-content: space-between;
+            align-items: center;
         }
     }
 }

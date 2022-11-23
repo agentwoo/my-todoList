@@ -1,8 +1,7 @@
-import { id } from "element-plus/es/locale";
 import { defineStore } from "pinia";
 import { computed, reactive, toRefs, watch } from "vue";
 import { Names } from './store-name'
-
+import { getDate } from '../utils/index'
 // todoListest
 interface todoListItem {
     text: string,
@@ -134,12 +133,24 @@ interface ItodoList {
     finished: boolean;
     significant: boolean;
     desc: string;
+    deadLine: string;
+    createTime: string;
+}
+
+// form
+interface IForm {
+    text: string;
+    desc: string;
+    deadLine: string;
 }
 
 export const useTodoListStore = defineStore(Names.TODOLIST, () => {
     // state
     const state = reactive({
-        todoList: JSON.parse(localStorage.getItem('myTodoList') as string) || [] as ItodoList[]
+        todoList: JSON.parse(localStorage.getItem('myTodoList') as string) || [] as ItodoList[],
+        searchVal: '',
+        searchRes: [] as [] | ItodoList[],
+        // editText: ''
     })
     // getters
     // 用于判断是否展示列表
@@ -168,37 +179,27 @@ export const useTodoListStore = defineStore(Names.TODOLIST, () => {
 
     // actions
     // 添加待办事项
-
-
     let id = 1//此处id有问题
     function addItem(Val: string, significant: boolean): boolean {
         let inputVal = Val.trim()
         if (!inputVal) return false
         let index = state.todoList.findIndex((v: { text: string; }) => v.text === inputVal)
         if (index !== -1) return false
-        state.todoList.unshift({ id: id++, text: inputVal, finished: false, significant: significant, desc: '' })
+        state.todoList.unshift({ id: id++, text: inputVal, finished: false, significant: significant, desc: '', deadLine: '', createTime: getDate() })
         return true
     }
     // 删除
     function delItem(item: ItodoList): boolean {
-        // console.log(item);
         let index = state.todoList.findIndex((v: { id: number }) => v.id === item.id)
         if (index === -1) return false
         state.todoList.splice(index, 1)
         return true
     }
     // 修改待办事项
-    function editItem(item: ItodoList, text: string): boolean {
+    function editItem(item: ItodoList, form: IForm): boolean {
         let index = state.todoList.findIndex((v: { id: number }) => v.id === item.id)
         if (index === -1) return false
-        state.todoList.splice(index, 1, { ...item, text: text })
-        return true
-    }
-    // 添加备注
-    function addDesc(item: ItodoList, desc: string): boolean {
-        let index = state.todoList.findIndex((v: { id: number }) => v.id === item.id)
-        if (index === -1) return false
-        state.todoList.splice(index, 1, { ...item, desc: desc })
+        state.todoList.splice(index, 1, { ...item, text: form.text, desc: form.desc, deadLine: form.deadLine })
         return true
     }
     // 查找待办事项
@@ -209,6 +210,7 @@ export const useTodoListStore = defineStore(Names.TODOLIST, () => {
         if (arr.length === 0) return 1
         return arr
     }
+
     // watch
     watch(() => state.todoList, newVal => {
         localStorage.setItem('myTodoList', JSON.stringify(newVal))
@@ -227,7 +229,6 @@ export const useTodoListStore = defineStore(Names.TODOLIST, () => {
         addItem,
         delItem,
         editItem,
-        addDesc,
         searchItem
     }
 })

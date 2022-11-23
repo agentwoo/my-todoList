@@ -33,7 +33,6 @@ export function getDate() {
     let D = date.getDate()
     D = (D < 10 ? `0${D}` : D) as number
     let X = date.getDay()
-    X = X > 6 ? X % 7 : X
     let arr = ['星期天', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六']
     let now = `${M}月${D}日，${arr[X]}`
     return now

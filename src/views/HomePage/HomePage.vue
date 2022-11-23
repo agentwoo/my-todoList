@@ -3,25 +3,37 @@
 import { reactive, toRefs, ref } from 'vue'
 import { Search } from '@element-plus/icons-vue'
 import { useTodoListStore } from '../../store/index'
-import { errMessage, successMessage } from '../../utils/index'
+import { delDialog, errMessage } from '../../utils/index'
+import router from '../../router';
 
 const todoListStore = useTodoListStore()
 
-const data = reactive({
-    inputlVal: ''
-})
 
 // 查询待办事项
 const search = () => {
-    let res = todoListStore.searchItem(data.inputlVal)
+    let res = todoListStore.searchItem(todoListStore.searchVal)
     if (res === 0)
         return errMessage('输入不能为空')
-    if (res == 1)
+    if (res === 1)
         return errMessage('没有该待办事项')
-    console.log(res);
-    data.inputlVal = ''
-    return res
+    todoListStore.searchRes = res
+    router.push({ path: '/search' })
+    todoListStore.searchVal = ''
 }
+
+// 个人中心
+const UserInfo = () => {
+    router.push({
+        path: '/userInfo'
+    })
+}
+
+// 退出登录
+async function SignOut() {
+    let res = await delDialog("确定退出登录", "提示")
+    res ? router.push({ path: '/login' }) : undefined
+}
+
 
 </script>
 
@@ -40,8 +52,8 @@ const search = () => {
                     </span>
                     <template #dropdown>
                         <el-dropdown-menu>
-                            <el-dropdown-item>个人中心</el-dropdown-item>
-                            <el-dropdown-item>退出登录</el-dropdown-item>
+                            <el-dropdown-item @click="UserInfo">个人中心</el-dropdown-item>
+                            <el-dropdown-item @click="SignOut">退出登录</el-dropdown-item>
                         </el-dropdown-menu>
                     </template>
                 </el-dropdown>
@@ -49,7 +61,7 @@ const search = () => {
 
             <!-- 查找输入框 -->
             <div class="homePage_aside_input">
-                <el-input v-model="data.inputlVal" placeholder="Search" @keyup.enter="search">
+                <el-input v-model="todoListStore.searchVal" placeholder="Search" @keyup.enter="search">
                     <template #suffix>
                         <el-icon class="el-input__icon" @click="search">
                             <Search />
