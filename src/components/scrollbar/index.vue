@@ -2,11 +2,12 @@
 <script lang='ts' setup>
 import { reactive, ref } from 'vue'
 import { Delete, Edit } from '@element-plus/icons-vue'
-import { errMessage, successMessage, delDialog } from '../../utils'
+import { errMessage, successMessage, delDialog, getNowDate } from '../../utils'
 import { useTodoListStore } from '../../store/index'
 // 将语言改为中文
 import { ElConfigProvider } from 'element-plus'
 import zhCn from 'element-plus/dist/locale/zh-cn.mjs'
+import moment from 'moment'
 
 
 const todoListStore = useTodoListStore()
@@ -19,6 +20,7 @@ interface ItodoList {
     desc: string;
     deadLine: string;
     createTime: string;
+    updateTime: string;
 }
 
 const data = reactive({
@@ -52,16 +54,12 @@ const editItem = (item: ItodoList) => {
     data.form.desc = item.desc
     data.form.deadLine = item.deadLine
     data.showDialog = true
-
-    // todoListStore.editText = item.text
 }
-
 
 // 待办事项验证规则
 const validateText = (rule: any, value: string, callback: any) => {
     const v = value.trim()
     if (!v) return callback("待办项不能为空")
-    // if (todoListStore.editText === v) return callback(undefined)
     if (data.currentItem?.text === v) return callback()
     let isExist = todoListStore.todoList.some((i: { text: string; }) => i.text === v)
     return callback(isExist ? '该待办项已存在' : undefined)
@@ -95,7 +93,9 @@ async function confirmEdit() {
                 <el-checkbox v-model="item.finished" />
                 {{ item.text }}
             </div>
-            <div v-show="item.deadLine" style="font-size: 8px;">截止日期:{{ item.deadLine }}</div>
+            <div v-show="item.deadLine" style="font-size: 8px;">
+                截止日期:{{ item.deadLine }}
+            </div>
             <div v-show="item.desc" style="font-size: 8px;">备注:{{ item.desc }}</div>
         </div>
         <div class="scrollbar-demo-item_right">
@@ -123,7 +123,7 @@ async function confirmEdit() {
 
             <el-form-item label="截止日期:" prop="deadLine">
                 <el-config-provider :locale="zhCn">
-                    <el-date-picker v-model="data.form.deadLine" type="date" placeholder="选择日期" format="YYYY/MM/DD"
+                    <el-date-picker v-model="data.form.deadLine" type="date" placeholder="选择日期" format="YYYY-MM-DD"
                         value-format="YYYY-MM-DD" />
                 </el-config-provider>
             </el-form-item>

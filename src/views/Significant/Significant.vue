@@ -31,7 +31,13 @@ const addItem = () => {
         </div>
         <div v-else class="showList">
             <el-scrollbar height="70vh">
-                <ScrollBar :finished-orunfinished="todoListStore.significant$"></ScrollBar>
+                <!-- 未完成 -->
+                <ScrollBar :finished-orunfinished="todoListStore.significantAndUnfinished$"></ScrollBar>
+                <!-- 已完成 -->
+                <template v-if="todoListStore.significantAndfinished$.length !== 0">
+                    <div>已完成:({{ todoListStore.significantAndfinished$.length }})</div>
+                    <ScrollBar :finished-orunfinished="todoListStore.significantAndfinished$"></ScrollBar>
+                </template>
             </el-scrollbar>
         </div>
         <div class="addIput">

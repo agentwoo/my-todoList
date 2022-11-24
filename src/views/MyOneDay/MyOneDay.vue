@@ -2,7 +2,7 @@
 <script lang='ts' setup>
 import { reactive } from 'vue'
 import { Plus } from '@element-plus/icons-vue'
-import { getDate, errMessage, successMessage } from '../../utils'
+import { getDate, errMessage, successMessage, getNowDate } from '../../utils'
 import { useTodoListStore } from '../../store/index'
 import ScrollBar from '../../components/scrollbar/index.vue'
 
@@ -35,12 +35,11 @@ const addItem = () => {
             <el-scrollbar>
                 <!-- 未完成事项 -->
                 <ScrollBar :finishedOrunfinished="todoListStore.unfinishedTodoList$"></ScrollBar>
-                <!-- 已完成数量 -->
-                <div v-if="todoListStore.finishedTodoListCount$ !== 0">
-                    已完成({{ todoListStore.finishedTodoListCount$ }})
-                </div>
-                <!-- 未完成事项 -->
-                <ScrollBar :finishedOrunfinished="todoListStore.finishedTodoList$"></ScrollBar>
+                <!-- 完成事项  -->
+                <template v-if="todoListStore.finishedTodoList$.length !== 0">
+                    已完成({{ todoListStore.finishedTodoList$.length }})
+                    <ScrollBar :finishedOrunfinished="todoListStore.finishedTodoList$"></ScrollBar>
+                </template>
             </el-scrollbar>
         </div>
         <!-- 输入框 -->

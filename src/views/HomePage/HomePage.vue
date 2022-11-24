@@ -5,7 +5,6 @@ import { Search } from '@element-plus/icons-vue'
 import { useTodoListStore } from '../../store/index'
 import { delDialog, errMessage } from '../../utils/index'
 import router from '../../router';
-
 const todoListStore = useTodoListStore()
 
 
@@ -42,7 +41,7 @@ async function SignOut() {
         <div class="homePage_aside">
             <!-- 头像 -->
             <div class="homePage_aside_user">
-                <img src="../../assets/pig.jpeg" alt="用户">
+                <img :src="todoListStore.userImg" alt="用户">
                 <!-- 下拉菜单 -->
                 <el-dropdown style="margin-top:50px" size="large">
                     <span>
@@ -72,19 +71,27 @@ async function SignOut() {
             <!-- 菜单 -->
             <div class="homePage_aside_menu">
                 <el-menu active-text-color="#ffd04b" background-color="#F2F2F2" default-active="1" text-color="black">
-                    <el-menu-item index="1">
-                        <el-icon>
-                            <Sunny />
-                        </el-icon>
-                        <!-- <span>我的一天</span> -->
-                        <RouterLink to="/myOneDay" style="text-decoration:none;">我的一天</RouterLink>
+                    <el-menu-item index="1" class="menu_item">
+                        <div>
+                            <el-icon>
+                                <Sunny />
+                            </el-icon>
+                            <RouterLink to="/myOneDay" style="text-decoration:none;">我的一天</RouterLink>
+                        </div>
+                        <el-badge :value="todoListStore.unfinishedTodoList$.length"
+                            v-show="todoListStore.unfinishedTodoList$.length" class="item" type="info">
+                        </el-badge>
                     </el-menu-item>
-                    <el-menu-item index="2">
-                        <el-icon>
-                            <Star />
-                        </el-icon>
-                        <!-- <span>重要</span> -->
-                        <RouterLink to="/significant" style="text-decoration:none;">重要</RouterLink>
+                    <el-menu-item index="2" class="menu_item">
+                        <div>
+                            <el-icon>
+                                <Star />
+                            </el-icon>
+                            <RouterLink to="/significant" style="text-decoration:none;">重要</RouterLink>
+                        </div>
+                        <el-badge :value="todoListStore.significantAndUnfinished$.length"
+                            v-show="todoListStore.significantAndUnfinished$.length" class="item" type="info">
+                        </el-badge>
                     </el-menu-item>
                     <el-menu-item index="3">
                         <el-icon>
@@ -154,6 +161,15 @@ body {
         &_menu {
             :deep(.el-menu) {
                 border: none;
+            }
+
+            .menu_item {
+                display: flex;
+                justify-content: space-between;
+
+                .item {
+                    margin-top: -12%;
+                }
             }
         }
     }
