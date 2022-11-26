@@ -2,11 +2,15 @@
 <script lang='ts' setup>
 import { reactive, toRefs, ref } from 'vue'
 import { Search } from '@element-plus/icons-vue'
-import { useTodoListStore } from '../../store/index'
+import { useTodoListStore, useUserStore, useMenusListStore } from '../../store/index'
 import { delDialog, errMessage } from '../../utils/index'
-import router from '../../router';
+import { useRouter } from 'vue-router'
 const todoListStore = useTodoListStore()
+const userStore = useUserStore()
+const menusListStore = useMenusListStore()
 
+
+const router = useRouter()
 
 // 查询待办事项
 const search = () => {
@@ -34,6 +38,25 @@ async function SignOut() {
 }
 
 
+const toMyOneDay = () => {
+    router.push({
+        path: '/myOneDay'
+    })
+}
+
+const toSignificant = () => {
+    router.push({
+        path: '/significant'
+    })
+}
+
+const toPlan = () => {
+    router.push({
+        path: '/plan'
+    })
+}
+
+
 </script>
 
 <template>
@@ -41,7 +64,7 @@ async function SignOut() {
         <div class="homePage_aside">
             <!-- 头像 -->
             <div class="homePage_aside_user">
-                <img :src="todoListStore.userImg" alt="用户">
+                <img :src="userStore.userImg" alt="用户">
                 <!-- 下拉菜单 -->
                 <el-dropdown style="margin-top:50px" size="large">
                     <span>
@@ -71,48 +94,66 @@ async function SignOut() {
             <!-- 菜单 -->
             <div class="homePage_aside_menu">
                 <el-menu active-text-color="#ffd04b" background-color="#F2F2F2" default-active="1" text-color="black">
-                    <el-menu-item index="1" class="menu_item">
+                    <el-menu-item index="1" class="menu_item" @click="toMyOneDay">
                         <div>
                             <el-icon>
                                 <Sunny />
                             </el-icon>
-                            <RouterLink to="/myOneDay" style="text-decoration:none;">我的一天</RouterLink>
+                            我的一天
                         </div>
                         <el-badge :value="todoListStore.unfinishedTodoList$.length"
                             v-show="todoListStore.unfinishedTodoList$.length" class="item" type="info">
                         </el-badge>
                     </el-menu-item>
-                    <el-menu-item index="2" class="menu_item">
+                    <el-menu-item index="2" class="menu_item" @click="toSignificant">
                         <div>
                             <el-icon>
                                 <Star />
                             </el-icon>
-                            <RouterLink to="/significant" style="text-decoration:none;">重要</RouterLink>
+                            重要
                         </div>
                         <el-badge :value="todoListStore.significantAndUnfinished$.length"
                             v-show="todoListStore.significantAndUnfinished$.length" class="item" type="info">
                         </el-badge>
                     </el-menu-item>
-                    <el-menu-item index="3">
-                        <el-icon>
-                            <Tickets />
-                        </el-icon>
-                        <span>计划内</span>
-                    </el-menu-item>
-                    <el-menu-item index="4">
-                        <el-icon>
-                            <User />
-                        </el-icon>
-                        <span>已分配给我</span>
-                    </el-menu-item>
-                    <el-menu-item index="5">
-                        <el-icon>
-                            <House />
-                        </el-icon>
-                        <span>任务</span>
+                    <el-menu-item index="3" class="menu_item" @click="toPlan">
+                        <div>
+                            <el-icon>
+                                <Tickets />
+                            </el-icon>
+                            计划内
+                        </div>
+                        <el-badge :value="todoListStore.PlanItemAndUnfinishe$.length"
+                            v-show="todoListStore.PlanItemAndUnfinishe$.length" class="item" type="info">
+                        </el-badge>
                     </el-menu-item>
                 </el-menu>
             </div>
+
+
+
+            <!-- 菜单栏测试 -->
+            <!-- <div class="homePage_aside_menu">
+                <el-menu active-text-color="#ffd04b" background-color="#545c64" class="el-menu-vertical-demo"
+                    text-color="#fff" :unique-opened="true" :router="true">
+                    <el-sub-menu :index="item.id + ''" v-for="item in menusListStore.getNewMenus" :key="item.id">
+                        <template #title>
+                            <el-icon>
+                                <location />
+                            </el-icon>
+                            <span>{{ item.title }}</span>
+                        </template>
+                        <el-menu-item :index="`${item.id}-${i.id}`" v-for="i in item.children" :key="i.id">
+                            {{ i.title }}
+                            <RouterLink to="/myOneDay" style="text-decoration:none;color: white;">{{ i.title }}
+                            </RouterLink>
+                        </el-menu-item>
+                    </el-sub-menu>
+                </el-menu>
+            </div> -->
+
+
+
         </div>
         <!-- 内容 -->
         <div class="homePage_content">
@@ -159,6 +200,10 @@ body {
         }
 
         &_menu {
+            height: 80%;
+            overflow: hidden;
+            // overflow: scroll;
+
             :deep(.el-menu) {
                 border: none;
             }

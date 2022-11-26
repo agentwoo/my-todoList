@@ -47,3 +47,9 @@ export function getNowDate() {
     let date = moment().format('YYYY-MM-DD hh:mm:ss')
     return date
 }
+
+
+export function getNowDate1() {
+    let date = moment().format('YYYY-MM-DD')
+    return date
+}

@@ -3,7 +3,8 @@
 import { reactive, toRefs, ref } from 'vue'
 import { loginApi, getLoginInfoApi } from '../../http/api'
 import router from '../../router';
-import { useTodoListStore } from '../../store/index'
+import { useMenusStore, useUserStore } from '../../store/index'
+
 
 interface ILoginForm {
     userName: string;
@@ -29,27 +30,28 @@ const rules = reactive({
 const loginFormRef = ref()
 
 
-
-
 // 登录
-const todoListStore = useTodoListStore()
+const menusStore = useMenusStore()
+const userInfo = useUserStore()
 const submitForm = () => {
-    // loginFormRef.value.validate().then(() => {
-    //     loginApi({
-    //         userName: loginForm.value.userName,
-    //         passWord: loginForm.value.passWord
-    //     }).then((res: any) => {
-    //         if (res.code === 200) {
-    //             localStorage.setItem('token', res.data.token)
-    //             getLoginInfoApi().then(res => {
-    //                 todoListStore.nemus = res.data.menus
-    //                 router.push('/homePage')
-    //             })
-    //         }
-    //     })
-    // }).catch(() => {
-    //     console.log('验证不通过');
-    // })
+    loginFormRef.value.validate().then(() => {
+        loginApi({
+            userName: loginForm.value.userName,
+            passWord: loginForm.value.passWord
+        }).then((res: any) => {
+            if (res.code === 200) {
+                localStorage.setItem('token', res.data.token)
+                getLoginInfoApi().then(res => {
+                    menusStore.nemus = res.data.menus
+
+
+                    router.push('/homePage')
+                })
+            }
+        })
+    }).catch(() => {
+        console.log('验证不通过');
+    })
 }
 
 

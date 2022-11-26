@@ -1,9 +1,9 @@
 <!-- 用户信息 -->
 <script lang='ts' setup>
 import { reactive, toRefs, ref } from 'vue'
-import { useTodoListStore } from '../../store/index'
+import { useUserStore } from '../../store/index'
 
-const todoListStore = useTodoListStore()
+const userStore = useUserStore()
 
 interface IuserInfo {
     img: string;
@@ -14,7 +14,7 @@ interface IuserInfo {
 }
 
 const userInfo = reactive<IuserInfo>({
-    img: todoListStore.userImg,
+    img: userStore.userImg,
     userName: '张三',
     userRemark: 'hello',
     mobile: "123465",

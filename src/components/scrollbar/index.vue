@@ -2,7 +2,7 @@
 <script lang='ts' setup>
 import { reactive, ref } from 'vue'
 import { Delete, Edit } from '@element-plus/icons-vue'
-import { errMessage, successMessage, delDialog, getNowDate } from '../../utils'
+import { errMessage, successMessage, delDialog, getNowDate, getNowDate1 } from '../../utils'
 import { useTodoListStore } from '../../store/index'
 // 将语言改为中文
 import { ElConfigProvider } from 'element-plus'
@@ -94,7 +94,12 @@ async function confirmEdit() {
                 {{ item.text }}
             </div>
             <div v-show="item.deadLine" style="font-size: 8px;">
-                截止日期:{{ item.deadLine }}
+                <template v-if="item.deadLine === getNowDate1()">
+                    截止日期: 今日
+                </template>
+                <template v-else>
+                    截止日期：{{ item.deadLine }}
+                </template>
             </div>
             <div v-show="item.desc" style="font-size: 8px;">备注:{{ item.desc }}</div>
         </div>
