@@ -1,8 +1,8 @@
-<!-- 我的一天 -->
+<!-- 任务 -->
 <script lang='ts' setup>
 import { reactive } from 'vue'
 import { Plus } from '@element-plus/icons-vue'
-import { getDate, errMessage, successMessage, getNowDate } from '../../utils'
+import { getDate, errMessage, successMessage } from '../../utils'
 import { useTodoListStore } from '../../store/index'
 import ScrollBar from '../../components/scrollbar/index.vue'
 
@@ -14,7 +14,7 @@ const todoListStore = useTodoListStore()
 
 //添加
 const addItem = () => {
-    const result = todoListStore.addItem(data.inputVal, false)
+    const result = todoListStore.addItem(data.inputVal, false, true)
     result ? successMessage('添加成功') : errMessage('该代办事项已存在')
     data.inputVal = ''
 }
@@ -27,18 +27,18 @@ const addItem = () => {
             <div class="header_title">我的一天</div>
             <div>{{ getDate() }}</div>
         </div>
-        <div class="tip" v-if="todoListStore.todoListCount$ === 0">
-            <el-empty :image-size="250" description="今日暂无待办事项" />
+        <div class="tip" v-if="todoListStore.todayTodoListCount$ === 0">
+            <el-empty :image-size="250" description="暂无待办任务" />
         </div>
         <!-- 展示列表 -->
         <div v-else class="showList">
             <el-scrollbar>
                 <!-- 未完成事项 -->
-                <ScrollBar :finishedOrunfinished="todoListStore.unfinishedTodoList$"></ScrollBar>
+                <ScrollBar :finishedOrunfinished="todoListStore.todayTodoListAndUnfinished$"></ScrollBar>
                 <!-- 完成事项  -->
-                <template v-if="todoListStore.finishedTodoList$.length !== 0">
-                    已完成({{ todoListStore.finishedTodoList$.length }})
-                    <ScrollBar :finishedOrunfinished="todoListStore.finishedTodoList$"></ScrollBar>
+                <template v-if="todoListStore.todayTodoListAndFinished$.length !== 0">
+                    已完成({{ todoListStore.todayTodoListAndFinished$.length }})
+                    <ScrollBar :finishedOrunfinished="todoListStore.todayTodoListAndFinished$"></ScrollBar>
                 </template>
             </el-scrollbar>
         </div>

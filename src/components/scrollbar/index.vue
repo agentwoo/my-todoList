@@ -2,13 +2,11 @@
 <script lang='ts' setup>
 import { reactive, ref } from 'vue'
 import { Delete, Edit } from '@element-plus/icons-vue'
-import { errMessage, successMessage, delDialog, getNowDate, getNowDate1 } from '../../utils'
+import { errMessage, successMessage, delDialog, getNowDate } from '../../utils'
 import { useTodoListStore } from '../../store/index'
 // 将语言改为中文
 import { ElConfigProvider } from 'element-plus'
 import zhCn from 'element-plus/dist/locale/zh-cn.mjs'
-import moment from 'moment'
-
 
 const todoListStore = useTodoListStore()
 
@@ -21,13 +19,14 @@ interface ItodoList {
     deadLine: string;
     createTime: string;
     updateTime: string;
+    today: boolean;
 }
 
 const data = reactive({
     showDialog: false,
     showDesDialog: false,
     currentItem: null as null | ItodoList,
-    form: { text: '', desc: '', deadLine: '' }
+    form: { today: false, text: '', desc: '', deadLine: '' }
 })
 
 type Props = {
@@ -52,6 +51,7 @@ const editItem = (item: ItodoList) => {
     data.currentItem = item
     data.form.text = item.text
     data.form.desc = item.desc
+    data.form.today = item.today
     data.form.deadLine = item.deadLine
     data.showDialog = true
 }
@@ -94,7 +94,7 @@ async function confirmEdit() {
                 {{ item.text }}
             </div>
             <div v-show="item.deadLine" style="font-size: 8px;">
-                <template v-if="item.deadLine === getNowDate1()">
+                <template v-if="item.deadLine === getNowDate()">
                     截止日期: 今日
                 </template>
                 <template v-else>
@@ -125,13 +125,19 @@ async function confirmEdit() {
             <el-form-item label="添加描述:" prop="desc">
                 <el-input v-model="data.form.desc" autocomplete="off" />
             </el-form-item>
-
             <el-form-item label="截止日期:" prop="deadLine">
                 <el-config-provider :locale="zhCn">
                     <el-date-picker v-model="data.form.deadLine" type="date" placeholder="选择日期" format="YYYY-MM-DD"
                         value-format="YYYY-MM-DD" />
                 </el-config-provider>
             </el-form-item>
+
+
+            <el-form-item label="我的一天:" prop="today">
+                <el-checkbox v-model="data.form.today" size="large" />
+            </el-form-item>
+
+
         </el-form>
         <template #footer>
             <span class="dialog-footer">

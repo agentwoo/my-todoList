@@ -44,6 +44,12 @@ const toMyOneDay = () => {
     })
 }
 
+const toAssignment = () => {
+    router.push({
+        path: '/assignment'
+    })
+}
+
 const toSignificant = () => {
     router.push({
         path: '/significant'
@@ -101,8 +107,8 @@ const toPlan = () => {
                             </el-icon>
                             我的一天
                         </div>
-                        <el-badge :value="todoListStore.unfinishedTodoList$.length"
-                            v-show="todoListStore.unfinishedTodoList$.length" class="item" type="info">
+                        <el-badge :value="todoListStore.todayTodoListAndUnfinished$.length"
+                            v-show="todoListStore.todayTodoListAndUnfinished$.length" class="item" type="info">
                         </el-badge>
                     </el-menu-item>
                     <el-menu-item index="2" class="menu_item" @click="toSignificant">
@@ -125,6 +131,17 @@ const toPlan = () => {
                         </div>
                         <el-badge :value="todoListStore.PlanItemAndUnfinishe$.length"
                             v-show="todoListStore.PlanItemAndUnfinishe$.length" class="item" type="info">
+                        </el-badge>
+                    </el-menu-item>
+                    <el-menu-item index="4" class="menu_item" @click="toAssignment">
+                        <div>
+                            <el-icon>
+                                <Sunny />
+                            </el-icon>
+                            任务
+                        </div>
+                        <el-badge :value="todoListStore.unfinishedTodoList$.length"
+                            v-show="todoListStore.unfinishedTodoList$.length" class="item" type="info">
                         </el-badge>
                     </el-menu-item>
                 </el-menu>

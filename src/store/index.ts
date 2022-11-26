@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import { computed, reactive, toRefs, watch } from "vue";
 import { Names } from './store-name'
-import { getNowDate, getNowDate1 } from '../utils/index'
+import { getNowDate } from '../utils/index'
 
 // 菜单栏
 interface IMenus111 {
@@ -71,6 +71,7 @@ interface ItodoList {
     deadLine: string;
     createTime: string;
     updateTime: string;
+    today: boolean;
 }
 
 // form--待办事项
@@ -78,6 +79,7 @@ interface IForm {
     text: string;
     desc: string;
     deadLine: string;
+    today: boolean;
 }
 
 export const useTodoListStore = defineStore(Names.TODOLIST, () => {
@@ -88,6 +90,18 @@ export const useTodoListStore = defineStore(Names.TODOLIST, () => {
         searchRes: [] as [] | ItodoList[]
     })
     // getters
+    // 我的一天
+    const todayTodoListCount$ = computed(() => {
+        return state.todoList.filter((v: { today: boolean; }) => v.today).length
+    })
+    const todayTodoListAndUnfinished$ = computed(() => {
+        return state.todoList.filter((v: { today: boolean; finished: string }) => v.today && !v.finished)
+    })
+    const todayTodoListAndFinished$ = computed(() => {
+        return state.todoList.filter((v: { today: boolean; finished: string }) => v.today && v.finished)
+    })
+
+
     // 用于判断是否展示列表
     const todoListCount$ = computed(() => {
         return state.todoList.length
@@ -108,19 +122,15 @@ export const useTodoListStore = defineStore(Names.TODOLIST, () => {
     const significantAndUnfinished$ = computed(() => {
         return state.todoList.filter((v: { significant: boolean; finished: boolean; }) => v.significant && !v.finished)
     })
-    // 重要且已完成
-    const significantAndfinished$ = computed(() => {
-        return state.todoList.filter((v: { significant: boolean; finished: boolean; }) => v.significant && v.finished)
-    })
 
     // 计划内
     const PlanItemAndUnfinishe$ = computed(() => {
-        const nowDate = getNowDate1()
+        const nowDate = getNowDate()
         return state.todoList.filter((v: { deadLine: string; finished: boolean; }) => v.deadLine === nowDate && !v.finished)
     })
 
     const PlanItemAndfinished$ = computed(() => {
-        const nowDate = getNowDate1()
+        const nowDate = getNowDate()
         return state.todoList.filter((v: { deadLine: string; finished: boolean; }) => v.deadLine === nowDate && v.finished)
     })
 
@@ -129,12 +139,23 @@ export const useTodoListStore = defineStore(Names.TODOLIST, () => {
     // actions
     // 添加待办事项
     let id = 1
-    function addItem(Val: string, significant: boolean): boolean {
+    function addItem(Val: string, significant: boolean, today: boolean): boolean {
         let inputVal = Val.trim()
         if (!inputVal) return false
         let index = state.todoList.findIndex((v: { text: string; }) => v.text === inputVal)
         if (index !== -1) return false
-        state.todoList.unshift({ id: id++, text: inputVal, finished: false, significant: significant, desc: '', deadLine: '', createTime: getNowDate(), updateTime: '' })
+        const opt = {
+            id: id++,
+            text: inputVal,
+            finished: false,
+            significant: significant,
+            desc: '',
+            deadLine: '',
+            createTime: getNowDate(),
+            updateTime: '',
+            today: today
+        }
+        state.todoList.unshift(opt)
         return true
     }
     // 删除
@@ -148,7 +169,15 @@ export const useTodoListStore = defineStore(Names.TODOLIST, () => {
     function editItem(item: ItodoList, form: IForm): boolean {
         let index = state.todoList.findIndex((v: { id: number }) => v.id === item.id)
         if (index === -1) return false
-        state.todoList.splice(index, 1, { ...item, text: form.text, desc: form.desc, deadLine: form.deadLine, updateTime: getNowDate() })
+        const opt = {
+            ...item,
+            text: form.text,
+            desc: form.desc,
+            deadLine: form.deadLine,
+            today: form.today,
+            updateTime: getNowDate()
+        }
+        state.todoList.splice(index, 1, opt)
         return true
     }
     // 查找事项
@@ -169,12 +198,14 @@ export const useTodoListStore = defineStore(Names.TODOLIST, () => {
 
     return {
         ...toRefs(state),
+        todayTodoListCount$,
+        todayTodoListAndUnfinished$,
+        todayTodoListAndFinished$,
         todoListCount$,
         unfinishedTodoList$,
         finishedTodoList$,
         SignificantCount$,
         significantAndUnfinished$,
-        significantAndfinished$,
         PlanItemAndUnfinishe$,
         PlanItemAndfinished$,
         addItem,

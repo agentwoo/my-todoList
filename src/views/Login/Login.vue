@@ -31,6 +31,30 @@ const loginFormRef = ref()
 
 
 // 登录
+// const menusStore = useMenusStore()
+// const userInfo = useUserStore()
+// const submitForm = () => {
+//     loginFormRef.value.validate().then(() => {
+//         loginApi({
+//             userName: loginForm.value.userName,
+//             passWord: loginForm.value.passWord
+//         }).then((res: any) => {
+//             if (res.code === 200) {
+//                 localStorage.setItem('token', res.data.token)
+//                 getLoginInfoApi().then(res => {
+//                     menusStore.nemus = res.data.menus
+
+
+//                     router.push('/homePage')
+//                 })
+//             }
+//         })
+//     }).catch(() => {
+//         console.log('验证不通过');
+//     })
+// }
+
+
 const menusStore = useMenusStore()
 const userInfo = useUserStore()
 const submitForm = () => {
@@ -63,7 +87,7 @@ const submitForm = () => {
     <div class="login-box">
         <el-form ref="loginFormRef" :model="loginForm" status-icon :rules="rules" label-width="70px" class="loginForm">
             <h2>todoList</h2>
-            <el-form-item label="账号:" prop="userName">
+            <el-form-item label="手机号:" prop="userName">
                 <el-input v-model="loginForm.userName" autocomplete="off" />
             </el-form-item>
             <el-form-item label="密码:" prop="passWord">
