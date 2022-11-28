@@ -20,6 +20,7 @@ interface ItodoList {
     createTime: string;
     updateTime: string;
     today: boolean;
+    pid: string;
 }
 
 const data = reactive({

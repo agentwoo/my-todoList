@@ -14,7 +14,7 @@ const todoListStore = useTodoListStore()
 
 //添加
 const addItem = () => {
-    const result = todoListStore.addItem(data.inputVal, false)
+    const result = todoListStore.addItem(data.inputVal, false, false, '', '')
     result ? successMessage('添加成功') : errMessage('该代办事项已存在')
     data.inputVal = ''
 }

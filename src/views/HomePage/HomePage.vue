@@ -62,6 +62,18 @@ const toPlan = () => {
     })
 }
 
+const toFresh = () => {
+    router.push({
+        path: '/fresh'
+    })
+}
+
+const toGoods = () => {
+    router.push({
+        path: '/goods'
+    })
+}
+
 
 </script>
 
@@ -129,8 +141,8 @@ const toPlan = () => {
                             </el-icon>
                             计划内
                         </div>
-                        <el-badge :value="todoListStore.PlanItemAndUnfinishe$.length"
-                            v-show="todoListStore.PlanItemAndUnfinishe$.length" class="item" type="info">
+                        <el-badge :value="todoListStore.plan$.haveDeadLineArrAndUnFinishedCount"
+                            v-show="todoListStore.plan$.haveDeadLineArrAndUnFinishedCount" class="item" type="info">
                         </el-badge>
                     </el-menu-item>
                     <el-menu-item index="4" class="menu_item" @click="toAssignment">
@@ -147,26 +159,48 @@ const toPlan = () => {
                 </el-menu>
             </div>
 
+            <div class="list">
+                <el-menu active-text-color="#ffd04b" background-color="#F2F2F2" text-color="black">
+                    <el-menu-item index="1" class="menu_item" @click="toFresh">
+                        <div>
+                            <el-icon>
+                                <Box />
+                            </el-icon>
+                            入门
+                        </div>
+                    </el-menu-item>
+                    <el-menu-item index="2" class="menu_item" @click="toGoods">
+                        <div>
+                            <el-icon>
+                                <Notebook />
+                            </el-icon>
+                            杂货
+                        </div>
+                    </el-menu-item>
+                </el-menu>
+            </div>
+
 
 
             <!-- 菜单栏测试 -->
-            <!-- <div class="homePage_aside_menu">
-                <el-menu active-text-color="#ffd04b" background-color="#545c64" class="el-menu-vertical-demo"
-                    text-color="#fff" :unique-opened="true" :router="true">
-                    <el-sub-menu :index="item.id + ''" v-for="item in menusListStore.getNewMenus" :key="item.id">
-                        <template #title>
-                            <el-icon>
-                                <location />
-                            </el-icon>
-                            <span>{{ item.title }}</span>
-                        </template>
-                        <el-menu-item :index="`${item.id}-${i.id}`" v-for="i in item.children" :key="i.id">
-                            {{ i.title }}
-                            <RouterLink to="/myOneDay" style="text-decoration:none;color: white;">{{ i.title }}
-                            </RouterLink>
-                        </el-menu-item>
-                    </el-sub-menu>
-                </el-menu>
+            <!-- <div class=" homePage_aside_menu">
+                        <el-menu active-text-color="#ffd04b" background-color="#545c64" class="el-menu-vertical-demo"
+                            text-color="#fff" :unique-opened="true" :router="true">
+                            <el-sub-menu :index="item.id + ''" v-for="item in menusListStore.getNewMenus"
+                                :key="item.id">
+                                <template #title>
+                                    <el-icon>
+                                        <location />
+                                    </el-icon>
+                                    <span>{{ item.title }}</span>
+                                </template>
+                                <el-menu-item :index="`${item.id}-${i.id}`" v-for="i in item.children" :key="i.id">
+                                    {{ i.title }}
+                                    <RouterLink to="/myOneDay" style="text-decoration:none;color: white;">{{ i.title }}
+                                    </RouterLink>
+                                </el-menu-item>
+                            </el-sub-menu>
+                        </el-menu>
             </div> -->
 
 
@@ -217,9 +251,7 @@ body {
         }
 
         &_menu {
-            height: 80%;
-            overflow: hidden;
-            // overflow: scroll;
+            border-bottom: 1px solid #DDDDDD;
 
             :deep(.el-menu) {
                 border: none;
@@ -232,6 +264,12 @@ body {
                 .item {
                     margin-top: -12%;
                 }
+            }
+        }
+
+        .list {
+            :deep(.el-menu) {
+                border: none;
             }
         }
     }

@@ -72,6 +72,7 @@ interface ItodoList {
     createTime: string;
     updateTime: string;
     today: boolean;
+    pid: string;
 }
 
 // form--待办事项
@@ -108,11 +109,11 @@ export const useTodoListStore = defineStore(Names.TODOLIST, () => {
     })
     // 未完成事项
     const unfinishedTodoList$ = computed(() => {
-        return state.todoList.filter((v: { finished: boolean }) => !v.finished)
+        return state.todoList.filter((v: { finished: boolean; pid: string }) => !v.finished && v.pid === '')
     })
     // 已完成事项
     const finishedTodoList$ = computed(() => {
-        return state.todoList.filter((v: { finished: boolean }) => v.finished)
+        return state.todoList.filter((v: { finished: boolean; pid: string }) => v.finished && v.pid === '')
     })
     // 重要事项
     const SignificantCount$ = computed(() => {
@@ -124,22 +125,74 @@ export const useTodoListStore = defineStore(Names.TODOLIST, () => {
     })
 
     // 计划内
-    const PlanItemAndUnfinishe$ = computed(() => {
-        const nowDate = getNowDate()
-        return state.todoList.filter((v: { deadLine: string; finished: boolean; }) => v.deadLine === nowDate && !v.finished)
+    const plan$ = computed(() => {
+        let last: ItodoList[] = []
+        let today: ItodoList[] = []
+        let tomorrow: ItodoList[] = []
+        let thisMonth: ItodoList[] = []
+        let future: ItodoList[] = []
+
+        let y = new Date().getFullYear()
+        let m = new Date().getMonth() + 1
+        //获取下个月第一天
+        let firstDayOfNextMonth = new Date(y, m, 1).getDate()
+        // console.log(new Date(y, m, 1));
+        // 下个月第一天时间戳
+        let firstDayOfNextMonthStamp = new Date(Date.parse(`${y}-${m + 1}-${firstDayOfNextMonth}`) + (24 * 60 * 60 * 1000 - 1)).getTime()
+
+        let firstDayOfNextMonthFormat = `${m + 1}月-${firstDayOfNextMonth}日`
+        // console.log(lastDayofTheMonth);
+
+        //当天24点时间戳
+        let todayOStamp = new Date(new Date().toLocaleDateString()).getTime();//当天0点时间戳
+        let today24Stamp = new Date(new Date(new Date().toLocaleDateString()).getTime() + (24 * 60 * 60 * 1000 - 1)).getTime();
+        // 获取第二天时间戳
+        let nextDay24Stamp = new Date(today24Stamp + (24 * 60 * 60 * 1000 - 1)).getTime();
+        // 过滤出含有截止日期的数据
+        let haveDeadLineArr = state.todoList.filter((v: { deadLine: string; }) => v.deadLine)
+        haveDeadLineArr.forEach((item: ItodoList) => {
+            let timeStamp = Date.parse(item.deadLine)
+            if (timeStamp < todayOStamp) {//今天之前
+                return last.push(item)
+            } else if (timeStamp > todayOStamp && timeStamp < today24Stamp) {//今天
+                return today.push(item)
+            } else if (timeStamp > today24Stamp && timeStamp < nextDay24Stamp) {//明天
+                return tomorrow.push(item)
+            } else if (timeStamp > nextDay24Stamp && timeStamp < firstDayOfNextMonthStamp) {//今天之后至下个月第一天
+                return thisMonth.push(item)
+            } else {
+                return future.push(item)
+            }
+        });
+        let haveDeadLineArrAndUnFinishedCount = haveDeadLineArr.filter((v: { finished: boolean; }) => !v.finished).length
+        return {
+            haveDeadLineArrAndUnFinishedCount,
+            firstDayOfNextMonthFormat,
+            last,
+            today,
+            tomorrow,
+            thisMonth,
+            future
+        }
     })
 
-    const PlanItemAndfinished$ = computed(() => {
-        const nowDate = getNowDate()
-        return state.todoList.filter((v: { deadLine: string; finished: boolean; }) => v.deadLine === nowDate && v.finished)
+
+
+    // 入门
+    const fresh$ = computed(() => {
+        return state.todoList.filter((v: { pid: string; }) => v.pid === '1')
     })
 
+    // 杂物
+    const goods$ = computed(() => {
+        return state.todoList.filter((v: { pid: string; }) => v.pid === '2')
+    })
 
 
     // actions
     // 添加待办事项
     let id = 1
-    function addItem(Val: string, significant: boolean, today: boolean): boolean {
+    function addItem(Val: string, significant: boolean, today: boolean, deadLine: string, pid: string): boolean {
         let inputVal = Val.trim()
         if (!inputVal) return false
         let index = state.todoList.findIndex((v: { text: string; }) => v.text === inputVal)
@@ -150,10 +203,11 @@ export const useTodoListStore = defineStore(Names.TODOLIST, () => {
             finished: false,
             significant: significant,
             desc: '',
-            deadLine: '',
+            deadLine: deadLine,
             createTime: getNowDate(),
             updateTime: '',
-            today: today
+            today: today,
+            pid: pid
         }
         state.todoList.unshift(opt)
         return true
@@ -206,8 +260,9 @@ export const useTodoListStore = defineStore(Names.TODOLIST, () => {
         finishedTodoList$,
         SignificantCount$,
         significantAndUnfinished$,
-        PlanItemAndUnfinishe$,
-        PlanItemAndfinished$,
+        plan$,
+        fresh$,
+        goods$,
         addItem,
         delItem,
         editItem,
