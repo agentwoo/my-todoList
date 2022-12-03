@@ -1,14 +1,14 @@
 <!-- 首页 -->
 <script lang='ts' setup>
-import { reactive, toRefs, ref } from 'vue'
+import { reactive, toRefs, ref, watch } from 'vue'
 import { Search } from '@element-plus/icons-vue'
-import { useTodoListStore, useUserStore, useMenusListStore } from '../../store/index'
-import { delDialog, errMessage } from '../../utils/index'
+import { useTodoListStore, useUserStore, useMenusStore } from '../../store/index'
+import { delDialog, errMessage, successMessage } from '../../utils/index'
 import { useRouter } from 'vue-router'
+
 const todoListStore = useTodoListStore()
 const userStore = useUserStore()
-const menusListStore = useMenusListStore()
-
+const menusStore = useMenusStore()
 
 const router = useRouter()
 
@@ -71,6 +71,41 @@ const toFresh = () => {
 const toGoods = () => {
     router.push({
         path: '/goods'
+    })
+}
+
+
+
+
+// 添加列表
+const data = reactive({
+    dialogFormVisible: false,
+    form: {
+        name: `无标题列表`
+    }
+})
+const addList = () => {
+    data.dialogFormVisible = true
+}
+
+let formRef = ref()
+async function confirmAddList() {
+    const $form = formRef.value
+    if (!$form) return
+    const valid = await $form.validate()
+    if (!valid) return
+
+    let result = menusStore.addList(data.form.name)
+    result ? successMessage('添加列表成功！') : errMessage('')
+    data.form.name = `无标题列表${menusStore.defaultTip$}`
+    data.dialogFormVisible = false
+}
+
+
+const toList = (pid: string) => {
+    router.push({
+        name: 'List',
+        params: { pid }
     })
 }
 
@@ -161,7 +196,7 @@ const toGoods = () => {
 
             <div class="list">
                 <el-menu active-text-color="#ffd04b" background-color="#F2F2F2" text-color="black">
-                    <el-menu-item index="1" class="menu_item" @click="toFresh">
+                    <!-- <el-menu-item index="1" class="menu_item" @click="toFresh">
                         <div>
                             <el-icon>
                                 <Box />
@@ -176,36 +211,52 @@ const toGoods = () => {
                             </el-icon>
                             杂货
                         </div>
+                    </el-menu-item> -->
+
+
+                    <el-menu-item :index="item.pid" v-for="item in menusStore.listArr" :key="item.pid"
+                        @click="toList(item.pid)">
+                        <div>
+                            <el-icon>
+                                <Box />
+                            </el-icon>
+                            {{ item.name }}
+                        </div>
                     </el-menu-item>
                 </el-menu>
             </div>
 
-
-
-            <!-- 菜单栏测试 -->
-            <!-- <div class=" homePage_aside_menu">
-                        <el-menu active-text-color="#ffd04b" background-color="#545c64" class="el-menu-vertical-demo"
-                            text-color="#fff" :unique-opened="true" :router="true">
-                            <el-sub-menu :index="item.id + ''" v-for="item in menusListStore.getNewMenus"
-                                :key="item.id">
-                                <template #title>
-                                    <el-icon>
-                                        <location />
-                                    </el-icon>
-                                    <span>{{ item.title }}</span>
-                                </template>
-                                <el-menu-item :index="`${item.id}-${i.id}`" v-for="i in item.children" :key="i.id">
-                                    {{ i.title }}
-                                    <RouterLink to="/myOneDay" style="text-decoration:none;color: white;">{{ i.title }}
-                                    </RouterLink>
-                                </el-menu-item>
-                            </el-sub-menu>
-                        </el-menu>
-            </div> -->
-
-
-
+            <!-- 添加列表 -->
+            <div class=" createList">
+                <el-menu active-text-color="black" background-color="#F2F2F2" text-color="black" @click="addList">
+                    <el-menu-item index="1" class="menu_item">
+                        <div>
+                            <el-icon>
+                                <Plus />
+                            </el-icon>
+                            新建列表
+                        </div>
+                    </el-menu-item>
+                </el-menu>
+            </div>
         </div>
+        <!-- 列表弹出框 -->
+        <el-dialog v-model="data.dialogFormVisible" title="添加列表">
+            <el-form :model="data.form" ref="formRef">
+                <el-form-item label="列表名称" label-width="100px" prop="name"
+                    :rules="{ required: true, message: '新建列表不能为空' }">
+                    <el-input v-model="data.form.name" autocomplete="off" />
+                </el-form-item>
+            </el-form>
+            <template #footer>
+                <span class="dialog-footer">
+                    <el-button @click="data.dialogFormVisible = false">取消</el-button>
+                    <el-button type="primary" @click="confirmAddList">
+                        确认
+                    </el-button>
+                </span>
+            </template>
+        </el-dialog>
         <!-- 内容 -->
         <div class="homePage_content">
             <RouterView></RouterView>
@@ -268,6 +319,20 @@ body {
         }
 
         .list {
+            height: calc(100vh - 440px);
+            overflow-y: scroll;
+
+            :deep(.el-menu) {
+                border: none;
+            }
+        }
+
+        .createList {
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 300px;
+
             :deep(.el-menu) {
                 border: none;
             }
@@ -284,5 +349,7 @@ body {
         overflow: hidden;
         border-radius: 20px 0 0 0;
     }
+
+
 }
 </style>

@@ -8,7 +8,6 @@ import { getDate, getNowDate, errMessage, successMessage } from '../../utils'
 
 
 const todoListStore = useTodoListStore()
-// console.log(todoListStore.plan$);
 
 const data = reactive({
     inputVal: '',
@@ -17,7 +16,13 @@ const data = reactive({
 //添加
 const addItem = () => {
     const result = todoListStore.addItem(data.inputVal, false, false, getNowDate(), '')
-    result ? successMessage('添加成功') : errMessage('该代办事项已存在')
+    if (result === 0) {
+        errMessage("输入不能为空！")
+    } else if (result === 1) {
+        errMessage('该代办事项已经存在！')
+    } else {
+        successMessage('添加成功！')
+    }
     data.inputVal = ''
 }
 
@@ -35,7 +40,7 @@ const addItem = () => {
         </div>
         <div v-else class="showList">
             <el-scrollbar>
-                <template v-if="todoListStore.plan$.last.length" class="lastColor">
+                <template v-if="todoListStore.plan$.last.length">
                     先前:({{ todoListStore.plan$.last.length }})
                     <ScrollBar :finishedOrunfinished="todoListStore.plan$.last"></ScrollBar>
                 </template>
@@ -92,6 +97,7 @@ const addItem = () => {
     .showList {
         height: 75vh;
         width: 90%;
+
     }
 
     .addIput {

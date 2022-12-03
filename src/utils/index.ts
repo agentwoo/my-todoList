@@ -37,7 +37,6 @@ export function getDate() {
     let X = date.getDay()
     let arr = ['星期天', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六']
     let now = `${M}月${D}日，${arr[X]}`
-    // let now = moment().format('YYYY-MM-DD')
     return now
 }
 
@@ -48,8 +47,3 @@ export function getNowDate() {
     return date
 }
 
-
-// export function getNowDate1() {
-//     let date = moment().format('YYYY-MM-DD')
-//     return date
-// }

@@ -13,7 +13,8 @@ const routes: Array<RouteRecordRaw> = [
 
 
             { path: 'fresh', component: () => import('../views/Fresh/Fresh.vue') },
-            { path: 'goods', component: () => import('../views/Goods/Goods.vue') }
+            { path: 'goods', component: () => import('../views/Goods/Goods.vue') },
+            { path: 'list/:pid', name: 'List', component: () => import('../views/Fresh/Fresh.vue') }
         ]
     },
     { path: '/todoList', component: () => import('../components/todoList/index.vue') },

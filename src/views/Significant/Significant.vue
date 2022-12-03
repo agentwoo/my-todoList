@@ -15,7 +15,13 @@ const todoListStore = useTodoListStore()
 //添加
 const addItem = () => {
     const result = todoListStore.addItem(data.inputVal, true, false, '', '')
-    result ? successMessage('添加成功') : errMessage('该代办事项已存在')
+    if (result === 0) {
+        errMessage("输入不能为空！")
+    } else if (result === 1) {
+        errMessage('该代办事项已经存在！')
+    } else {
+        successMessage('添加成功！')
+    }
     data.inputVal = ''
 }
 </script>
@@ -26,7 +32,7 @@ const addItem = () => {
             <div class="header_title">重要</div>
             <div>{{ getDate() }}</div>
         </div>
-        <div class="tip" v-if="todoListStore.SignificantCount$ === 0">
+        <div class="tip" v-if="todoListStore.significantAndUnfinished$.length === 0">
             <el-empty :image-size="250" description="暂无重要事项" />
         </div>
         <div v-else class="showList">
