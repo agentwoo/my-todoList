@@ -18,8 +18,6 @@ const addItem = () => {
     const result = todoListStore.addItem(data.inputVal, false, false, getNowDate(), '')
     if (result === 0) {
         errMessage("输入不能为空！")
-    } else if (result === 1) {
-        errMessage('该代办事项已经存在！')
     } else {
         successMessage('添加成功！')
     }

@@ -1,7 +1,7 @@
 <!-- 首页 -->
 <script lang='ts' setup>
 import { reactive, toRefs, ref, watch } from 'vue'
-import { Search } from '@element-plus/icons-vue'
+import { Search, Delete } from '@element-plus/icons-vue'
 import { useTodoListStore, useUserStore, useMenusStore } from '../../store/index'
 import { delDialog, errMessage, successMessage } from '../../utils/index'
 import { useRouter } from 'vue-router'
@@ -19,6 +19,7 @@ const search = () => {
         return errMessage('输入不能为空')
     if (res === 1)
         return errMessage('没有该待办事项')
+
     todoListStore.searchRes = res
     router.push({ path: '/search' })
     todoListStore.searchVal = ''
@@ -62,26 +63,11 @@ const toPlan = () => {
     })
 }
 
-const toFresh = () => {
-    router.push({
-        path: '/fresh'
-    })
-}
-
-const toGoods = () => {
-    router.push({
-        path: '/goods'
-    })
-}
-
-
-
-
 // 添加列表
 const data = reactive({
     dialogFormVisible: false,
     form: {
-        name: `无标题列表`
+        name: '无标题列表'
     }
 })
 const addList = () => {
@@ -97,16 +83,20 @@ async function confirmAddList() {
 
     let result = menusStore.addList(data.form.name)
     result ? successMessage('添加列表成功！') : errMessage('')
-    data.form.name = `无标题列表${menusStore.defaultTip$}`
     data.dialogFormVisible = false
+    data.form.name = `无标题列表${menusStore.defaultTip$ + 1}`
 }
-
 
 const toList = (pid: string) => {
     router.push({
         name: 'List',
         params: { pid }
     })
+}
+
+const delListItem = (pid: string) => {
+    let result = menusStore.delList(pid)
+    result ? successMessage('列表删除成功') : errMessage('')
 }
 
 
@@ -194,34 +184,30 @@ const toList = (pid: string) => {
                 </el-menu>
             </div>
 
+            <!-- 自定义列表 -->
             <div class="list">
                 <el-menu active-text-color="#ffd04b" background-color="#F2F2F2" text-color="black">
-                    <!-- <el-menu-item index="1" class="menu_item" @click="toFresh">
-                        <div>
-                            <el-icon>
-                                <Box />
-                            </el-icon>
-                            入门
-                        </div>
-                    </el-menu-item>
-                    <el-menu-item index="2" class="menu_item" @click="toGoods">
-                        <div>
-                            <el-icon>
-                                <Notebook />
-                            </el-icon>
-                            杂货
-                        </div>
-                    </el-menu-item> -->
-
-
                     <el-menu-item :index="item.pid" v-for="item in menusStore.listArr" :key="item.pid"
-                        @click="toList(item.pid)">
+                        @click="toList(item.pid)" class="list_item">
                         <div>
                             <el-icon>
                                 <Box />
                             </el-icon>
                             {{ item.name }}
                         </div>
+
+
+
+                        <div>
+                            <el-button type="danger" :icon="Delete" circle class="delBtn"
+                                @click="delListItem(item.pid)" />
+                            <el-badge type="info" :value="menusStore.unfinishedTodo$[Number(item.pid) - 1]"
+                                v-show="menusStore.unfinishedTodo$[Number(item.pid) - 1]" class="list_item_item">
+                            </el-badge>
+                        </div>
+
+
+
                     </el-menu-item>
                 </el-menu>
             </div>
@@ -229,7 +215,7 @@ const toList = (pid: string) => {
             <!-- 添加列表 -->
             <div class=" createList">
                 <el-menu active-text-color="black" background-color="#F2F2F2" text-color="black" @click="addList">
-                    <el-menu-item index="1" class="menu_item">
+                    <el-menu-item index="1">
                         <div>
                             <el-icon>
                                 <Plus />
@@ -325,6 +311,29 @@ body {
             :deep(.el-menu) {
                 border: none;
             }
+
+            :deep(.el-icon) {
+                margin-right: 0;
+            }
+
+            .list_item {
+                display: flex;
+                justify-content: space-between;
+
+                :deep(.el-button) {
+                    width: 30px;
+                    height: 30px;
+                }
+
+                .list_item_item {
+                    margin-top: -12%;
+                }
+
+                .delBtn {
+                    margin-right: 14px;
+                }
+            }
+
         }
 
         .createList {

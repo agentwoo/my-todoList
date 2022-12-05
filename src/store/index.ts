@@ -28,20 +28,20 @@ interface IForm {
 export const useTodoListStore = defineStore(Names.TODOLIST, () => {
     // state
     const state = reactive({
-        todoList: JSON.parse(localStorage.getItem('myTodoList') as string) || [] as ItodoList[],
+        todoList: (JSON.parse(localStorage.getItem('myTodoList') as string) || []) as ItodoList[],
         searchVal: '',
-        searchRes: [] as [] | ItodoList[]
+        searchRes: [] as ItodoList[]
     })
     // getters
     // 我的一天
     const todayTodoListCount$ = computed(() => {
-        return state.todoList.filter((v: { today: boolean; }) => v.today).length
+        return state.todoList.filter((v) => v.today).length
     })
     const todayTodoListAndUnfinished$ = computed(() => {
-        return state.todoList.filter((v: { today: boolean; finished: string }) => v.today && !v.finished)
+        return state.todoList.filter((v) => v.today && !v.finished)
     })
     const todayTodoListAndFinished$ = computed(() => {
-        return state.todoList.filter((v: { today: boolean; finished: string }) => v.today && v.finished)
+        return state.todoList.filter((v) => v.today && v.finished)
     })
 
 
@@ -51,15 +51,15 @@ export const useTodoListStore = defineStore(Names.TODOLIST, () => {
     })
     // 未完成事项
     const unfinishedTodoList$ = computed(() => {
-        return state.todoList.filter((v: { finished: boolean; pid: string }) => !v.finished && v.pid === '')
+        return state.todoList.filter((v) => !v.finished && v.pid === '')
     })
     // 已完成事项
     const finishedTodoList$ = computed(() => {
-        return state.todoList.filter((v: { finished: boolean; pid: string }) => v.finished && v.pid === '')
+        return state.todoList.filter((v) => v.finished && v.pid === '')
     })
     // 重要且未完成
     const significantAndUnfinished$ = computed(() => {
-        return state.todoList.filter((v: { significant: boolean; finished: boolean; }) => v.significant && !v.finished)
+        return state.todoList.filter((v) => v.significant && !v.finished)
     })
 
     // 计划内
@@ -84,7 +84,7 @@ export const useTodoListStore = defineStore(Names.TODOLIST, () => {
         // 获取第二天时间戳
         let nextDay24Stamp = new Date(today24Stamp + (24 * 60 * 60 * 1000)).getTime();
         // 过滤出含有截止日期的数据
-        let haveDeadLineArr = state.todoList.filter((v: { deadLine: string; }) => v.deadLine)
+        let haveDeadLineArr = state.todoList.filter(v => v.deadLine)
         haveDeadLineArr.forEach((item: ItodoList) => {
             let timeStamp = Date.parse(item.deadLine)
             if (timeStamp < todayOStamp) {//今天之前
@@ -99,7 +99,7 @@ export const useTodoListStore = defineStore(Names.TODOLIST, () => {
                 return future.push(item)
             }
         });
-        let haveDeadLineArrAndUnFinishedCount = haveDeadLineArr.filter((v: { finished: boolean; }) => !v.finished).length
+        let haveDeadLineArrAndUnFinishedCount = haveDeadLineArr.filter((v) => !v.finished).length
         return {
             haveDeadLineArrAndUnFinishedCount,
             firstDayOfNextMonthFormat,
@@ -111,27 +111,12 @@ export const useTodoListStore = defineStore(Names.TODOLIST, () => {
         }
     })
 
-
-
-    // 入门
-    const fresh$ = computed(() => {
-        return state.todoList.filter((v: { pid: string; }) => v.pid === '1')
-    })
-
-    // 杂物
-    const goods$ = computed(() => {
-        return state.todoList.filter((v: { pid: string; }) => v.pid === '2')
-    })
-
-
     // actions
     // 添加待办事项
     let id = 1
     function addItem(Val: string, significant: boolean, today: boolean, deadLine: string, pid: string): number {
         let inputVal = Val.trim()
         if (!inputVal) return 0
-        let index = state.todoList.findIndex((v: { text: string; }) => v.text === inputVal)
-        if (index !== -1) return 1
         const opt = {
             id: id++,
             text: inputVal,
@@ -149,14 +134,14 @@ export const useTodoListStore = defineStore(Names.TODOLIST, () => {
     }
     // 删除
     function delItem(item: ItodoList): boolean {
-        let index = state.todoList.findIndex((v: { id: number }) => v.id === item.id)
+        let index = state.todoList.findIndex((v) => v.id === item.id)
         if (index === -1) return false
         state.todoList.splice(index, 1)
         return true
     }
     // 修改待办事项
     function editItem(item: ItodoList, form: IForm): boolean {
-        let index = state.todoList.findIndex((v: { id: number }) => v.id === item.id)
+        let index = state.todoList.findIndex((v) => v.id === item.id)
         if (index === -1) return false
         const opt = {
             ...item,
@@ -170,10 +155,10 @@ export const useTodoListStore = defineStore(Names.TODOLIST, () => {
         return true
     }
     // 查找事项
-    function searchItem(Val: string) {
+    function searchItem(Val: string): 0 | 1 | ItodoList[] {
         let val = Val.trim()
         if (!val) return 0
-        let arr = state.todoList.filter((v: { text: string; }) => v.text.indexOf(val) !== -1)
+        let arr = state.todoList.filter((v) => v.text.indexOf(val) !== -1)
         if (arr.length === 0) return 1
         return arr
     }
@@ -195,8 +180,6 @@ export const useTodoListStore = defineStore(Names.TODOLIST, () => {
         finishedTodoList$,
         significantAndUnfinished$,
         plan$,
-        fresh$,
-        goods$,
         addItem,
         delItem,
         editItem,
@@ -213,21 +196,62 @@ interface IlistArr {
 }
 export const useMenusStore = defineStore(Names.MENUS, () => {
     const state = reactive({
-        listArr: JSON.parse(localStorage.getItem('listArr') as string) || [] as IlistArr[]
+        listArr: (JSON.parse(localStorage.getItem('listArr') as string) || []) as IlistArr[],
+        pid: ''
     })
+    // 默认提示
     const defaultTip$ = computed(() => {
-        return state.listArr.filter((v: { name: string; }) => v.name.indexOf('无标题列表') !== -1).length
+        return state.listArr.filter((v) => v.name.indexOf('无标题列表') !== -1).length
+    })
+    // 展示自定义列表中的todo
+    const todoListStore = useTodoListStore()
+    const defineListTodo$ = computed(() => {
+        return todoListStore.todoList.filter((v) => v.pid === state.pid && !v.finished)
+    })
+    // 已完成
+    const defineListTodoAndUndefinish$ = computed(() => {
+        return todoListStore.todoList.filter((v) => v.pid === state.pid && v.finished)
     })
 
+    // 计算未完成数量
+    const unfinishedTodo$ = computed(() => {
+        let arr: number[] = []
+        state.listArr.forEach((item: IlistArr) => {
+            let listItem = todoListStore.todoList.filter((v) => v.pid === item.pid && !v.finished).length
+            arr.push(listItem)
+        })
+        return arr
+    })
+
+    // 添加自定义列表
     let pid = 1
     function addList(val: string): boolean {
         const opt = {
             name: val,
-            pid: pid++ + ''
+            pid: `${pid++}`
         }
         state.listArr.push(opt)
         return true
     }
+
+
+
+    // 删除自定义列表
+    function delList(val: string): boolean {
+        let index = state.listArr.findIndex((v) => v.pid === val)
+        if (index === -1) return false
+        state.listArr.splice(index, 1)
+        // 删除该自定义列表所拥有的todo
+        // 此处应倒序遍历，否则将会出错
+        for (let i = todoListStore.todoList.length - 1; i > -1; i--) {
+            if (todoListStore.todoList[i].pid === val) {
+                todoListStore.todoList.splice(i, 1)
+            }
+        }
+        return true
+    }
+
+
 
     watch(() => state.listArr, newVal => {
         localStorage.setItem('listArr', JSON.stringify(newVal))
@@ -238,7 +262,11 @@ export const useMenusStore = defineStore(Names.MENUS, () => {
     return {
         ...toRefs(state),
         defaultTip$,
-        addList
+        defineListTodo$,
+        unfinishedTodo$,
+        defineListTodoAndUndefinish$,
+        addList,
+        delList
     }
 })
 

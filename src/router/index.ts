@@ -10,14 +10,9 @@ const routes: Array<RouteRecordRaw> = [
             { path: 'plan', component: () => import('../views/Plan/Plan.vue') },
             { path: 'userInfo', component: () => import('../views/UserInfo/UserInfo.vue') },
             { path: 'search', component: () => import('../views/SearchPage/SearchPage.vue') },
-
-
-            { path: 'fresh', component: () => import('../views/Fresh/Fresh.vue') },
-            { path: 'goods', component: () => import('../views/Goods/Goods.vue') },
-            { path: 'list/:pid', name: 'List', component: () => import('../views/Fresh/Fresh.vue') }
+            { path: 'list/:pid', name: 'List', component: () => import('../views/DefineList/DefineList.vue') }
         ]
     },
-    { path: '/todoList', component: () => import('../components/todoList/index.vue') },
     { path: '/login', component: () => import('../views/Login/Login.vue') }
 ]
 
