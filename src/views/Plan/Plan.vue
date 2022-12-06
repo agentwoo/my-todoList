@@ -15,7 +15,7 @@ const data = reactive({
 
 //添加
 const addItem = () => {
-    const result = todoListStore.addItem(data.inputVal, false, false, getNowDate(), '')
+    const result = todoListStore.addItem(data.inputVal, false, false, getNowDate(), '', '')
     if (result === 0) {
         errMessage("输入不能为空！")
     } else {
@@ -50,11 +50,13 @@ const addItem = () => {
                     明天:({{ todoListStore.plan$.tomorrow.length }})
                     <ScrollBar :finishedOrunfinished="todoListStore.plan$.tomorrow"></ScrollBar>
                 </template>
+
                 <template v-if="todoListStore.plan$.thisMonth.length">
-                    {{ getDate() }}至:{{ todoListStore.plan$.firstDayOfNextMonthFormat }}
+                    {{ todoListStore.plan$.nearDeadLine }} 至: {{ todoListStore.plan$.firstDayOfNextMonthFormat }}
                     ({{ todoListStore.plan$.thisMonth.length }})
                     <ScrollBar :finishedOrunfinished="todoListStore.plan$.thisMonth"></ScrollBar>
                 </template>
+
                 <template v-if="todoListStore.plan$.future.length">
                     稍后:({{ todoListStore.plan$.future.length }})
                     <ScrollBar :finishedOrunfinished="todoListStore.plan$.future"></ScrollBar>

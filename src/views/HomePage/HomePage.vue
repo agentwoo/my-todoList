@@ -9,7 +9,6 @@ import { useRouter } from 'vue-router'
 const todoListStore = useTodoListStore()
 const userStore = useUserStore()
 const menusStore = useMenusStore()
-
 const router = useRouter()
 
 // 查询待办事项
@@ -136,7 +135,7 @@ const delListItem = (pid: string) => {
             </div>
             <!-- 菜单 -->
             <div class="homePage_aside_menu">
-                <el-menu active-text-color="#ffd04b" background-color="#F2F2F2" default-active="1" text-color="black">
+                <el-menu active-text-color="#ffd04b" background-color="#F2F2F2" text-color="black">
                     <el-menu-item index="1" class="menu_item" @click="toMyOneDay">
                         <div>
                             <el-icon>
@@ -195,19 +194,14 @@ const delListItem = (pid: string) => {
                             </el-icon>
                             {{ item.name }}
                         </div>
-
-
-
                         <div>
                             <el-button type="danger" :icon="Delete" circle class="delBtn"
                                 @click="delListItem(item.pid)" />
-                            <el-badge type="info" :value="menusStore.unfinishedTodo$[Number(item.pid) - 1]"
-                                v-show="menusStore.unfinishedTodo$[Number(item.pid) - 1]" class="list_item_item">
+                            <el-badge type="info" :value="menusStore.unfinishedTodo$.find(v => v.pid === item.pid)?.num"
+                                v-show="menusStore.unfinishedTodo$.find(v => v.pid === item.pid)?.num"
+                                class="list_item_item">
                             </el-badge>
                         </div>
-
-
-
                     </el-menu-item>
                 </el-menu>
             </div>

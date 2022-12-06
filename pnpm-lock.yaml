@@ -6,6 +6,7 @@ specifiers:
   axios: ^1.2.0
   element-plus: ^2.2.22
   moment: ^2.29.4
+  nanoid: ^4.0.0
   pinia: ^2.0.24
   sass: ^1.56.1
   typescript: ^4.6.4
@@ -19,6 +20,7 @@ dependencies:
   axios: 1.2.0
   element-plus: 2.2.22_vue@3.2.45
   moment: 2.29.4
+  nanoid: 4.0.0
   pinia: 2.0.24_mgnvym7yiazkylwwogi5r767ue
   sass: 1.56.1
   vue: 3.2.45
@@ -734,6 +736,12 @@ packages:
     resolution: {integrity: sha512-MqBkQh/OHTS2egovRtLk45wEyNXwF+cokD+1YPf9u5VfJiRdAiRwB2froX5Co9Rh20xs4siNPm8naNotSD6RBw==}
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
+
+  /nanoid/4.0.0:
+    resolution: {integrity: sha512-IgBP8piMxe/gf73RTQx7hmnhwz0aaEXYakvqZyE302IXW3HyVNhdNGC+O2MwMAVhLEnvXlvKtGbtJf6wvHihCg==}
+    engines: {node: ^14 || ^16 || >=18}
+    hasBin: true
+    dev: false
 
   /normalize-path/3.0.0:
     resolution: {integrity: sha512-6eZs5Ls3WtCisHWp9S2GUy8dqkpGi4BVSz3GaqiE6ezub0512ESztXUwUB6C6IKbQkY2Pnb/mD4WYojCRwcwLA==}

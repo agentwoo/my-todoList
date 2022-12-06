@@ -2,10 +2,11 @@ import { defineStore } from "pinia";
 import { computed, reactive, toRefs, watch } from "vue";
 import { Names } from './store-name'
 import { getNowDate } from '../utils/index'
+import { nanoid } from 'nanoid'
 
 // todoList
 interface ItodoList {
-    id: number;
+    id: string;
     text: string;
     finished: boolean;
     significant: boolean;
@@ -15,6 +16,7 @@ interface ItodoList {
     updateTime: string;
     today: boolean;
     pid: string;
+    definieListName: string;
 }
 
 // form--待办事项
@@ -44,7 +46,6 @@ export const useTodoListStore = defineStore(Names.TODOLIST, () => {
         return state.todoList.filter((v) => v.today && v.finished)
     })
 
-
     // 用于判断是否展示列表
     const todoListCount$ = computed(() => {
         return state.todoList.length
@@ -72,37 +73,69 @@ export const useTodoListStore = defineStore(Names.TODOLIST, () => {
 
         let y = new Date().getFullYear()
         let m = new Date().getMonth() + 1
-        //获取下个月第一天
-        let firstDayOfNextMonth = new Date(y, m, 1).getDate()
-        // 下个月第一天时间戳
-        let firstDayOfNextMonthStamp = new Date(Date.parse(`${y}-${m + 1}-${firstDayOfNextMonth}`) + (24 * 60 * 60 * 1000 - 1)).getTime()
-        let firstDayOfNextMonthFormat = `${m + 1}月-${firstDayOfNextMonth}日`
 
+        // 下个月第一天时间戳
+        let firstDayOfNextMonthStamp = 0
+        let firstDayOfNextMonthFormat = ''
+        if (m < 12) {
+            firstDayOfNextMonthStamp = new Date(Date.parse(`${y}-${m + 1}-1`) + (24 * 60 * 60 * 1000 - 1)).getTime()
+            firstDayOfNextMonthFormat = `${m + 1}月1日`
+        } else {
+            firstDayOfNextMonthStamp = new Date(Date.parse(`${y + 1}-1-1`) + (24 * 60 * 60 * 1000 - 1)).getTime()
+            firstDayOfNextMonthFormat = `${y + 1}年1月1日`
+        }
+
+        //当天0点时间戳
+        let todayOStamp = new Date(new Date().toLocaleDateString()).getTime();
         //当天24点时间戳
-        let todayOStamp = new Date(new Date().toLocaleDateString()).getTime();//当天0点时间戳
         let today24Stamp = new Date(new Date(new Date().toLocaleDateString()).getTime() + (24 * 60 * 60 * 1000 - 1)).getTime();
         // 获取第二天时间戳
         let nextDay24Stamp = new Date(today24Stamp + (24 * 60 * 60 * 1000)).getTime();
+
+        // 存储所有事件的时间
+        interface IdeadLineArr {
+            time: number;
+            deadLine: string;
+        }
+        let deadLineArr: IdeadLineArr[] = []
+
         // 过滤出含有截止日期的数据
         let haveDeadLineArr = state.todoList.filter(v => v.deadLine)
         haveDeadLineArr.forEach((item: ItodoList) => {
             let timeStamp = Date.parse(item.deadLine)
             if (timeStamp < todayOStamp) {//今天之前
-                return last.push(item)
+                last.push(item)
             } else if (timeStamp > todayOStamp && timeStamp < today24Stamp) {//今天
-                return today.push(item)
+                today.push(item)
             } else if (timeStamp > today24Stamp && timeStamp < nextDay24Stamp) {//明天
-                return tomorrow.push(item)
+                tomorrow.push(item)
             } else if (timeStamp > nextDay24Stamp && timeStamp < firstDayOfNextMonthStamp) {//今天之后至下个月第一天
-                return thisMonth.push(item)
+                thisMonth.push(item)
+                let deadLine = item.deadLine.split('-').join('')
+                deadLineArr.push({ time: Number(deadLine), deadLine: item.deadLine })
             } else {
-                return future.push(item)
+                future.push(item)
             }
         });
+
+
+        let nearDeadLineTime = deadLineArr[0].time
+        for (let i = 0; i < deadLineArr.length; i++) {
+            if (nearDeadLineTime > deadLineArr[i].time) {
+                nearDeadLineTime = deadLineArr[i].time
+            }
+        }
+        // console.log(nearDeadLineTime);
+        // console.log(deadLineArr);
+        let nearDeadLineItem = deadLineArr.find(v => v.time === nearDeadLineTime)
+        let nearDeadLine = nearDeadLineItem?.deadLine
+
+
         let haveDeadLineArrAndUnFinishedCount = haveDeadLineArr.filter((v) => !v.finished).length
         return {
             haveDeadLineArrAndUnFinishedCount,
             firstDayOfNextMonthFormat,
+            nearDeadLine,
             last,
             today,
             tomorrow,
@@ -113,12 +146,11 @@ export const useTodoListStore = defineStore(Names.TODOLIST, () => {
 
     // actions
     // 添加待办事项
-    let id = 1
-    function addItem(Val: string, significant: boolean, today: boolean, deadLine: string, pid: string): number {
+    function addItem(Val: string, significant: boolean, today: boolean, deadLine: string, pid: string, definieListName: string): number {
         let inputVal = Val.trim()
         if (!inputVal) return 0
         const opt = {
-            id: id++,
+            id: nanoid(7),
             text: inputVal,
             finished: false,
             significant: significant,
@@ -127,10 +159,11 @@ export const useTodoListStore = defineStore(Names.TODOLIST, () => {
             createTime: getNowDate(),
             updateTime: '',
             today: today,
-            pid: pid
+            pid: pid,
+            definieListName: definieListName
         }
         state.todoList.unshift(opt)
-        return 2
+        return 1
     }
     // 删除
     function delItem(item: ItodoList): boolean {
@@ -213,28 +246,33 @@ export const useMenusStore = defineStore(Names.MENUS, () => {
         return todoListStore.todoList.filter((v) => v.pid === state.pid && v.finished)
     })
 
+    interface IListUnfinishedCount {
+        num: number;
+        pid: string;
+    }
     // 计算未完成数量
     const unfinishedTodo$ = computed(() => {
-        let arr: number[] = []
+        let arr: IListUnfinishedCount[] = []
         state.listArr.forEach((item: IlistArr) => {
             let listItem = todoListStore.todoList.filter((v) => v.pid === item.pid && !v.finished).length
-            arr.push(listItem)
+            const opt = {
+                num: listItem,
+                pid: item.pid
+            }
+            arr.push(opt)
         })
         return arr
     })
 
     // 添加自定义列表
-    let pid = 1
     function addList(val: string): boolean {
         const opt = {
             name: val,
-            pid: `${pid++}`
+            pid: nanoid(7)
         }
         state.listArr.push(opt)
         return true
     }
-
-
 
     // 删除自定义列表
     function delList(val: string): boolean {
@@ -250,8 +288,6 @@ export const useMenusStore = defineStore(Names.MENUS, () => {
         }
         return true
     }
-
-
 
     watch(() => state.listArr, newVal => {
         localStorage.setItem('listArr', JSON.stringify(newVal))

@@ -7,11 +7,13 @@ import { useTodoListStore } from '../../store/index'
 // 将语言改为中文
 import { ElConfigProvider } from 'element-plus'
 import zhCn from 'element-plus/dist/locale/zh-cn.mjs'
+import { useRouter } from 'vue-router'
 
 const todoListStore = useTodoListStore()
+const router = useRouter()
 
 interface ItodoList {
-    id: number;
+    id: string;
     text: string;
     finished: boolean;
     significant: boolean;
@@ -21,6 +23,7 @@ interface ItodoList {
     updateTime: string;
     today: boolean;
     pid: string;
+    definieListName: string;
 }
 
 const data = reactive({
@@ -89,21 +92,42 @@ async function confirmEdit() {
 
 <template>
     <div v-for="item in finishedOrunfinished" :key="item.id" class="scrollbar-demo-item">
-        <div :class="{ finishedText: item.finished, isDesc: item.desc, isDeadLine: item.deadLine }">
+        <div :class="{
+            finishedText: item.finished, isDesc: item.desc, isDeadLine: item.deadLine,
+            isListName: item.definieListName
+        }">
             <div>
                 <el-checkbox v-model="item.finished" />
                 {{ item.text }}
             </div>
-            <div v-show="item.deadLine" style="font-size: 8px;">
-                <template v-if="item.deadLine === getNowDate()">
-                    截止日期: 今日
-                </template>
-                <template v-else>
-                    截止日期：{{ item.deadLine }}
-                </template>
+            <!-- 所属列表、截止日期 -->
+            <div style="font-size: 8px;">
+                <div style="margin-right:8px">
+                    <template v-if="(!item.pid && !item.today)">
+                        任务
+                    </template>
+                    <template v-if="(item.today && router.currentRoute.value.path !== '/myOneDay')">
+                        我的一天
+                    </template>
+                    <template
+                        v-if="item.pid && (router.currentRoute.value.path === '/myOneDay'
+                        || router.currentRoute.value.path === '/significant' || router.currentRoute.value.path === '/plan')">
+                        {{ item.definieListName }}
+                    </template>
+                </div>
+                <div v-show="item.deadLine">
+                    <template v-if="item.deadLine === getNowDate()">
+                        截止日期: 今日
+                    </template>
+                    <template v-else>
+                        截止日期：{{ item.deadLine }}
+                    </template>
+                </div>
             </div>
+            <!-- 备注 -->
             <div v-show="item.desc" style="font-size: 8px;">备注:{{ item.desc }}</div>
         </div>
+        <!-- 列表右侧操作 -->
         <div class="scrollbar-demo-item_right">
             <el-button text :icon="Edit" @click="editItem(item)" v-show="!item.finished">修改</el-button>
             <el-button text :icon="Delete" @click="delItem(item)">删除</el-button>
@@ -132,13 +156,9 @@ async function confirmEdit() {
                         value-format="YYYY-MM-DD" />
                 </el-config-provider>
             </el-form-item>
-
-
             <el-form-item label="我的一天:" prop="today">
                 <el-checkbox v-model="data.form.today" size="large" />
             </el-form-item>
-
-
         </el-form>
         <template #footer>
             <span class="dialog-footer">
@@ -178,6 +198,7 @@ async function confirmEdit() {
     }
 
     .isDesc,
+    .isListName,
     .isDeadLine {
         display: flex;
         flex-direction: column;

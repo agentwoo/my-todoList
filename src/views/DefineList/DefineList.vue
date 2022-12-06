@@ -21,14 +21,14 @@ const data = reactive({
 
 watch(() => route.params, newVal => {
     menusStore.pid = newVal.pid as string
-    const item = menusStore.listArr.find((v: { pid: string }) => v.pid === newVal.pid)
+    const item = menusStore.listArr.find((v) => v.pid === newVal.pid)
     if (item) data.item = item
 }, {
     immediate: true
 })
 
 const addItem = () => {
-    const result = todoListStore.addItem(data.inputVal, false, false, '', data.item.pid)
+    const result = todoListStore.addItem(data.inputVal, false, false, '', data.item.pid, data.item.name)
     if (result === 0) {
         errMessage("输入不能为空！")
     } else {

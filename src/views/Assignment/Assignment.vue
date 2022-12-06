@@ -2,7 +2,7 @@
 <script lang='ts' setup>
 import { reactive } from 'vue'
 import { Plus } from '@element-plus/icons-vue'
-import { getDate, errMessage, successMessage } from '../../utils'
+import { errMessage, successMessage } from '../../utils'
 import { useTodoListStore } from '../../store/index'
 import ScrollBar from '../../components/scrollbar/index.vue'
 
@@ -14,7 +14,7 @@ const todoListStore = useTodoListStore()
 
 //添加
 const addItem = () => {
-    const result = todoListStore.addItem(data.inputVal, false, false, '', '')
+    const result = todoListStore.addItem(data.inputVal, false, false, '', '', '')
     if (result === 0) {
         errMessage("输入不能为空！")
     } else {

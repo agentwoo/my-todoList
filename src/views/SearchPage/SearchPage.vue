@@ -8,7 +8,7 @@ const todoListStore = useTodoListStore()
 </script>
 
 <template>
-    <div>
+    <div class="searchList">
         <div v-if="todoListStore.searchRes.length === 0">
             <el-empty :image-size="250" description="查无此项" />
         </div>
@@ -21,5 +21,8 @@ const todoListStore = useTodoListStore()
 </template>
 
 <style lang='scss' scoped>
-
+.searchList {
+    height: 100%;
+    overflow-y: scroll;
+}
 </style>

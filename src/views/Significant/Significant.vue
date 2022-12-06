@@ -14,7 +14,7 @@ const todoListStore = useTodoListStore()
 
 //添加
 const addItem = () => {
-    const result = todoListStore.addItem(data.inputVal, true, false, '', '')
+    const result = todoListStore.addItem(data.inputVal, true, false, '', '', '')
     if (result === 0) {
         errMessage("输入不能为空！")
     } else {
