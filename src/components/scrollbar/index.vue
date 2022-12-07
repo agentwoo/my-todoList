@@ -2,7 +2,7 @@
 <script lang='ts' setup>
 import { reactive, ref } from 'vue'
 import { Delete, Edit } from '@element-plus/icons-vue'
-import { errMessage, successMessage, delDialog, getNowDate } from '../../utils'
+import { errMessage, successMessage, delDialog, getNowDate, getYesterday, getTomorrow } from '../../utils'
 import { useTodoListStore } from '../../store/index'
 // 将语言改为中文
 import { ElConfigProvider } from 'element-plus'
@@ -37,7 +37,6 @@ type Props = {
     finishedOrunfinished?: ItodoList[]
 }
 defineProps<Props>()
-
 
 // 删除
 async function delItem(item: ItodoList) {
@@ -116,11 +115,22 @@ async function confirmEdit() {
                     </template>
                 </div>
                 <div v-show="item.deadLine">
-                    <template v-if="item.deadLine === getNowDate()">
-                        截止日期: 今日
+                    <template v-if="item.deadLine === getYesterday()">
+                        <span style="color:red">截止日期:昨天</span>
+                    </template>
+                    <template v-else-if="item.deadLine === getNowDate()">
+                        <div style="color:#005FB8">
+                            截止日期: 今天
+                        </div>
+                    </template>
+                    <template v-else-if="item.deadLine === getTomorrow()">
+                        截止日期: 明天
                     </template>
                     <template v-else>
-                        截止日期：{{ item.deadLine }}
+                        <div
+                            :style="{ color: Date.parse(item.deadLine) < Date.parse(getNowDate()) ? ' red' : 'black' }">
+                            截止日期：{{ item.deadLine }}
+                        </div>
                     </template>
                 </div>
             </div>
@@ -182,7 +192,7 @@ async function confirmEdit() {
     text-align: center;
     border-radius: 4px;
     background: var(--el-color-primary-light-9);
-    color: var(--el-color-primary);
+    color: black;
 
     &_right {
         display: flex;

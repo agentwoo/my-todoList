@@ -93,11 +93,16 @@ const toList = (pid: string) => {
     })
 }
 
-const delListItem = (pid: string) => {
-    let result = menusStore.delList(pid)
-    result ? successMessage('列表删除成功') : errMessage('')
+// 删除自定义列表
+async function delListItem(pid: string) {
+    let delListTitle = menusStore.listArr.find(v => v.pid === pid)?.name
+    let res = await delDialog(`将永久删除"${delListTitle}"`, "删除列表")
+    if (res) {
+        let result = menusStore.delList(pid)
+        result ? successMessage('列表删除成功') : errMessage('')
+        router.push('/myOneDay')
+    }
 }
-
 
 </script>
 
@@ -135,8 +140,9 @@ const delListItem = (pid: string) => {
             </div>
             <!-- 菜单 -->
             <div class="homePage_aside_menu">
-                <el-menu active-text-color="#ffd04b" background-color="#F2F2F2" text-color="black">
-                    <el-menu-item index="1" class="menu_item" @click="toMyOneDay">
+                <el-menu active-text-color="#ffd04b" background-color="#F2F2F2" text-color="black"
+                    :default-active="router.currentRoute.value.path">
+                    <el-menu-item index="/myOneDay" class="menu_item" @click="toMyOneDay">
                         <div>
                             <el-icon>
                                 <Sunny />
@@ -147,7 +153,7 @@ const delListItem = (pid: string) => {
                             v-show="todoListStore.todayTodoListAndUnfinished$.length" class="item" type="info">
                         </el-badge>
                     </el-menu-item>
-                    <el-menu-item index="2" class="menu_item" @click="toSignificant">
+                    <el-menu-item index="/significant" class="menu_item" @click="toSignificant">
                         <div>
                             <el-icon>
                                 <Star />
@@ -158,7 +164,7 @@ const delListItem = (pid: string) => {
                             v-show="todoListStore.significantAndUnfinished$.length" class="item" type="info">
                         </el-badge>
                     </el-menu-item>
-                    <el-menu-item index="3" class="menu_item" @click="toPlan">
+                    <el-menu-item index="/plan" class="menu_item" @click="toPlan">
                         <div>
                             <el-icon>
                                 <Tickets />
@@ -169,7 +175,7 @@ const delListItem = (pid: string) => {
                             v-show="todoListStore.plan$.haveDeadLineArrAndUnFinishedCount" class="item" type="info">
                         </el-badge>
                     </el-menu-item>
-                    <el-menu-item index="4" class="menu_item" @click="toAssignment">
+                    <el-menu-item index="/assignment" class="menu_item" @click="toAssignment">
                         <div>
                             <el-icon>
                                 <Sunny />
@@ -185,7 +191,8 @@ const delListItem = (pid: string) => {
 
             <!-- 自定义列表 -->
             <div class="list">
-                <el-menu active-text-color="#ffd04b" background-color="#F2F2F2" text-color="black">
+                <el-menu active-text-color="#ffd04b" background-color="#F2F2F2" text-color="black"
+                    :default-active="router.currentRoute.value.params.pid">
                     <el-menu-item :index="item.pid" v-for="item in menusStore.listArr" :key="item.pid"
                         @click="toList(item.pid)" class="list_item">
                         <div>
@@ -317,10 +324,13 @@ body {
                 :deep(.el-button) {
                     width: 30px;
                     height: 30px;
+                    margin-bottom: 16px;
                 }
 
                 .list_item_item {
-                    margin-top: -12%;
+                    :deep(.el-badge__content) {
+                        margin-bottom: 10px;
+                    }
                 }
 
                 .delBtn {

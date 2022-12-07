@@ -91,13 +91,8 @@ export const useTodoListStore = defineStore(Names.TODOLIST, () => {
         let today24Stamp = new Date(new Date(new Date().toLocaleDateString()).getTime() + (24 * 60 * 60 * 1000 - 1)).getTime();
         // 获取第二天时间戳
         let nextDay24Stamp = new Date(today24Stamp + (24 * 60 * 60 * 1000)).getTime();
-
-        // 存储所有事件的时间
-        interface IdeadLineArr {
-            time: number;
-            deadLine: string;
-        }
-        let deadLineArr: IdeadLineArr[] = []
+        // 存储所有事件的截止时间
+        let deadLineArr: number[] = []
 
         // 过滤出含有截止日期的数据
         let haveDeadLineArr = state.todoList.filter(v => v.deadLine)
@@ -111,26 +106,28 @@ export const useTodoListStore = defineStore(Names.TODOLIST, () => {
                 tomorrow.push(item)
             } else if (timeStamp > nextDay24Stamp && timeStamp < firstDayOfNextMonthStamp) {//今天之后至下个月第一天
                 thisMonth.push(item)
-                let deadLine = item.deadLine.split('-').join('')
-                deadLineArr.push({ time: Number(deadLine), deadLine: item.deadLine })
+                // 将所有截止时间以时间戳格式存储
+                let deadLine = Date.parse(item.deadLine)
+                deadLineArr.push(deadLine)
             } else {
                 future.push(item)
             }
         });
 
-
-        let nearDeadLineTime = deadLineArr[0].time
+        // 查找最近的一个截止时间
+        let nearDeadLineStamp = deadLineArr[0]
         for (let i = 0; i < deadLineArr.length; i++) {
-            if (nearDeadLineTime > deadLineArr[i].time) {
-                nearDeadLineTime = deadLineArr[i].time
+            if (nearDeadLineStamp > deadLineArr[i]) {
+                nearDeadLineStamp = deadLineArr[i]
             }
         }
-        // console.log(nearDeadLineTime);
-        // console.log(deadLineArr);
-        let nearDeadLineItem = deadLineArr.find(v => v.time === nearDeadLineTime)
-        let nearDeadLine = nearDeadLineItem?.deadLine
+        let nearDeadLineFormat = new Date(nearDeadLineStamp)
+        let nearY = nearDeadLineFormat.getFullYear()
+        let nearM = nearDeadLineFormat.getMonth() + 1
+        let nearD = nearDeadLineFormat.getDate()
+        let nearDeadLine = `${nearY}年${nearM}月${nearD}日`
 
-
+        // 获取拥有截止日期但未完成的数量
         let haveDeadLineArrAndUnFinishedCount = haveDeadLineArr.filter((v) => !v.finished).length
         return {
             haveDeadLineArrAndUnFinishedCount,

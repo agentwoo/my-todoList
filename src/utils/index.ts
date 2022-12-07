@@ -40,10 +40,17 @@ export function getDate() {
     return now
 }
 
-
 // 获取当天日期--创建、修改时用
 export function getNowDate() {
-    let date = moment().format('YYYY-MM-DD')
-    return date
+    return moment().format('YYYY-MM-DD')
+}
+
+// 获取昨天日期
+export function getYesterday() {
+    return moment().subtract(1, 'days').format('YYYY-MM-DD');
+}
+// 获取昨天日期
+export function getTomorrow() {
+    return moment().add(1, 'days').format('YYYY-MM-DD');
 }
 
