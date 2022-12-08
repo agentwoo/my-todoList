@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
 
 const routes: Array<RouteRecordRaw> = [
+    { path: '/', redirect: '/myOneDay' },
     {
         path: '/', component: () => import('../views/HomePage/HomePage.vue'),
         children: [

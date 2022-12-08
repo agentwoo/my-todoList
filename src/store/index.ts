@@ -46,9 +46,9 @@ export const useTodoListStore = defineStore(Names.TODOLIST, () => {
         return state.todoList.filter((v) => v.today && v.finished)
     })
 
-    // 用于判断是否展示列表
+    // 用于任务列表中判断是否展示列表
     const todoListCount$ = computed(() => {
-        return state.todoList.length
+        return state.todoList.filter(v => v.pid === '').length
     })
     // 未完成事项
     const unfinishedTodoList$ = computed(() => {
@@ -130,6 +130,7 @@ export const useTodoListStore = defineStore(Names.TODOLIST, () => {
         // 获取拥有截止日期但未完成的数量
         let haveDeadLineArrAndUnFinishedCount = haveDeadLineArr.filter((v) => !v.finished).length
         return {
+            haveDeadLineArr,
             haveDeadLineArrAndUnFinishedCount,
             firstDayOfNextMonthFormat,
             nearDeadLine,

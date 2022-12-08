@@ -60,7 +60,7 @@ const addItem = () => {
     margin-left: 40px;
 
     .header {
-        height: 15vh;
+        height: 10vh;
         margin-top: 10px;
         color: white;
 
@@ -71,15 +71,19 @@ const addItem = () => {
     }
 
     .tip {
-        height: 75vh;
+        height: 80vh;
         display: flex;
         justify-content: center;
         font-weight: 900;
+
+        :deep(.el-empty__description p) {
+            color: white
+        }
     }
 
     .showList {
-        height: 75vh;
-        width: 90%;
+        height: 80vh;
+        width: 94%;
     }
 
     .addIput {

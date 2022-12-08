@@ -4,11 +4,9 @@ import { reactive, toRefs, ref } from 'vue'
 import { Plus } from '@element-plus/icons-vue'
 import { useTodoListStore } from '../../store/index'
 import ScrollBar from '../../components/scrollbar/index.vue'
-import { getDate, getNowDate, errMessage, successMessage } from '../../utils'
-
+import { getNowDate, errMessage, successMessage } from '../../utils'
 
 const todoListStore = useTodoListStore()
-
 const data = reactive({
     inputVal: '',
 })
@@ -23,7 +21,6 @@ const addItem = () => {
     }
     data.inputVal = ''
 }
-
 </script>
 
 <template>
@@ -31,10 +28,8 @@ const addItem = () => {
         <div class="header">
             <div class="header_title">计划内</div>
         </div>
-        <div class="tip"
-            v-if="todoListStore.plan$.last.length === 0 && todoListStore.plan$.today.length == 0 &&
-            todoListStore.plan$.tomorrow.length && todoListStore.plan$.thisMonth.length && todoListStore.plan$.future.length == 0">
-            <el-empty :image-size="250" description="今日暂无待办事项" />
+        <div class="tip" v-if="(todoListStore.plan$.haveDeadLineArr.length === 0)">
+            <el-empty :image-size="250" description="暂无待办事项" />
         </div>
         <div v-else class="showList">
             <el-scrollbar>
@@ -50,13 +45,11 @@ const addItem = () => {
                     明天:({{ todoListStore.plan$.tomorrow.length }})
                     <ScrollBar :finishedOrunfinished="todoListStore.plan$.tomorrow"></ScrollBar>
                 </template>
-
                 <template v-if="todoListStore.plan$.thisMonth.length">
                     {{ todoListStore.plan$.nearDeadLine }} 至: {{ todoListStore.plan$.firstDayOfNextMonthFormat }}
                     ({{ todoListStore.plan$.thisMonth.length }})
                     <ScrollBar :finishedOrunfinished="todoListStore.plan$.thisMonth"></ScrollBar>
                 </template>
-
                 <template v-if="todoListStore.plan$.future.length">
                     稍后:({{ todoListStore.plan$.future.length }})
                     <ScrollBar :finishedOrunfinished="todoListStore.plan$.future"></ScrollBar>
@@ -77,7 +70,7 @@ const addItem = () => {
     margin-left: 40px;
 
     .header {
-        height: 15vh;
+        height: 10vh;
         margin-top: 10px;
         color: white;
 
@@ -88,15 +81,19 @@ const addItem = () => {
     }
 
     .tip {
-        height: 75vh;
+        height: 80vh;
         display: flex;
         justify-content: center;
         font-weight: 900;
+
+        :deep(.el-empty__description p) {
+            color: white
+        }
     }
 
     .showList {
-        height: 75vh;
-        width: 90%;
+        height: 80vh;
+        width: 94%;
 
     }
 

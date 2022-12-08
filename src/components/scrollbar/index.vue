@@ -61,15 +61,20 @@ const editItem = (item: ItodoList) => {
 
 // 待办事项验证规则
 const validateText = (rule: any, value: string, callback: any) => {
+    // const v = value.trim()
+    // if (!v) return callback("待办项不能为空")
+    // if (data.currentItem?.text === v) return callback()
+    // let isExist = todoListStore.todoList.some((i: { text: string; }) => i.text === v)
+    // return callback(isExist ? '该待办项已存在' : undefined)
+
     const v = value.trim()
     if (!v) return callback("待办项不能为空")
     if (data.currentItem?.text === v) return callback()
-    let isExist = todoListStore.todoList.some((i: { text: string; }) => i.text === v)
-    return callback(isExist ? '该待办项已存在' : undefined)
+    return callback()
 }
 
 const rules = reactive({
-    text: [{ validator: validateText, trigger: 'blur' }]
+    text: [{ validator: validateText }]
 })
 
 // 确定修改
@@ -92,8 +97,8 @@ async function confirmEdit() {
 <template>
     <div v-for="item in finishedOrunfinished" :key="item.id" class="scrollbar-demo-item">
         <div :class="{
-            finishedText: item.finished, isDesc: item.desc, isDeadLine: item.deadLine,
-            isListName: item.definieListName
+            isDesc: item.desc, isDeadLine: item.deadLine, isListName: item.definieListName,
+            notPid: !item.pid, finishedText: item.finished
         }">
             <div>
                 <el-checkbox v-model="item.finished" />
@@ -207,6 +212,7 @@ async function confirmEdit() {
         color: gray;
     }
 
+    .notPid,
     .isDesc,
     .isListName,
     .isDeadLine {

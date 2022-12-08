@@ -60,6 +60,7 @@ const addItem = () => {
 
     .title {
         height: 10vh;
+        margin-top: 10px;
         color: white;
         font-size: 35px;
         font-weight: 500;
@@ -67,7 +68,7 @@ const addItem = () => {
 
     .showList {
         height: 80vh;
-        width: 90%;
+        width: 94%;
     }
 
     .addIput {

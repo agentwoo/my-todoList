@@ -58,24 +58,24 @@ const loginFormRef = ref()
 const menusStore = useMenusStore()
 const userInfo = useUserStore()
 const submitForm = () => {
-    loginFormRef.value.validate().then(() => {
-        loginApi({
-            userName: loginForm.value.userName,
-            passWord: loginForm.value.passWord
-        }).then((res: any) => {
-            if (res.code === 200) {
-                localStorage.setItem('token', res.data.token)
-                getLoginInfoApi().then(res => {
-                    menusStore.nemus = res.data.menus
+    // loginFormRef.value.validate().then(() => {
+    //     loginApi({
+    //         userName: loginForm.value.userName,
+    //         passWord: loginForm.value.passWord
+    //     }).then((res: any) => {
+    //         if (res.code === 200) {
+    //             localStorage.setItem('token', res.data.token)
+    //             getLoginInfoApi().then(res => {
+    //                 menusStore.nemus = res.data.menus
 
 
-                    router.push('/homePage')
-                })
-            }
-        })
-    }).catch(() => {
-        console.log('验证不通过');
-    })
+    //                 router.push('/homePage')
+    //             })
+    //         }
+    //     })
+    // }).catch(() => {
+    //     console.log('验证不通过');
+    // })
 }
 
 
@@ -103,8 +103,7 @@ const submitForm = () => {
 <style scoped lang="scss">
 .login-box {
     height: 100vh;
-    background-image: url('../../assets/loginBgm.jpg');
-    background-repeat: repeat;
+    background-color: #5C8ABB;
     box-sizing: border-box;
     padding-top: 200px;
 

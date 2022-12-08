@@ -34,7 +34,7 @@ const addItem = () => {
             <el-empty :image-size="250" description="暂无重要事项" />
         </div>
         <div v-else class="showList">
-            <el-scrollbar height="70vh">
+            <el-scrollbar>
                 <!-- 未完成 -->
                 <ScrollBar :finished-orunfinished="todoListStore.significantAndUnfinished$"></ScrollBar>
             </el-scrollbar>
@@ -52,7 +52,7 @@ const addItem = () => {
     margin-left: 40px;
 
     .header {
-        height: 15vh;
+        height: 10vh;
         margin-top: 10px;
         color: white;
 
@@ -63,15 +63,19 @@ const addItem = () => {
     }
 
     .tip {
-        height: 75vh;
+        height: 80vh;
         display: flex;
         justify-content: center;
         font-weight: 900;
+
+        :deep(.el-empty__description p) {
+            color: white
+        }
     }
 
     .showList {
-        height: 75vh;
-        width: 90%;
+        height: 80vh;
+        width: 94%;
     }
 
     .addIput {

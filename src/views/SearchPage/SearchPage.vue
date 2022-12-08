@@ -9,7 +9,7 @@ const todoListStore = useTodoListStore()
 
 <template>
     <div class="searchList">
-        <div v-if="todoListStore.searchRes.length === 0">
+        <div class="tip" v-if="todoListStore.searchRes.length === 0">
             <el-empty :image-size="250" description="查无此项" />
         </div>
         <template v-else>
@@ -22,7 +22,19 @@ const todoListStore = useTodoListStore()
 
 <style lang='scss' scoped>
 .searchList {
-    height: 100%;
+    height: 96vh;
+    margin-top: 2vh;
     overflow-y: scroll;
+
+    .tip {
+        height: 80vh;
+        display: flex;
+        justify-content: center;
+        font-weight: 900;
+
+        :deep(.el-empty__description p) {
+            color: white
+        }
+    }
 }
 </style>

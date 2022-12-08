@@ -11,16 +11,39 @@ const userStore = useUserStore()
 const menusStore = useMenusStore()
 const router = useRouter()
 
+let color = ref<string>('')
+watch(() => router.currentRoute.value.path, newVal => {
+    switch (newVal) {
+        case '/myOneDay':
+            color.value = '#5C8ABB'
+            break;
+        case '/significant':
+            color.value = '#EB897C'
+            break;
+        case '/plan':
+            color.value = '#86C5BC'
+            break;
+        default:
+            color.value = '#8BBFCC'
+    }
+}, {
+    immediate: true
+})
+
 // 查询待办事项
 const search = () => {
     let res = todoListStore.searchItem(todoListStore.searchVal)
     if (res === 0)
         return errMessage('输入不能为空')
-    if (res === 1)
+    if (res === 1) {
+        todoListStore.searchRes = []
+        router.push({ path: '/search' })
         return errMessage('没有该待办事项')
+    }
 
     todoListStore.searchRes = res
     router.push({ path: '/search' })
+    successMessage('查询成功！')
     todoListStore.searchVal = ''
 }
 
@@ -72,7 +95,12 @@ const data = reactive({
 const addList = () => {
     data.dialogFormVisible = true
 }
-
+const rules = reactive({
+    name: [
+        { required: true, message: '新建列表不能为空' },
+        { min: 1, max: 10, message: '列表名称不能超过10个字' }
+    ]
+})
 let formRef = ref()
 async function confirmAddList() {
     const $form = formRef.value
@@ -130,7 +158,7 @@ async function delListItem(pid: string) {
 
             <!-- 查找输入框 -->
             <div class="homePage_aside_input">
-                <el-input v-model="todoListStore.searchVal" placeholder="Search" @keyup.enter="search">
+                <el-input v-model="todoListStore.searchVal" placeholder="搜索" @keyup.enter="search">
                     <template #suffix>
                         <el-icon class="el-input__icon" @click="search">
                             <Search />
@@ -140,7 +168,7 @@ async function delListItem(pid: string) {
             </div>
             <!-- 菜单 -->
             <div class="homePage_aside_menu">
-                <el-menu active-text-color="#ffd04b" background-color="#F2F2F2" text-color="black"
+                <el-menu active-text-color="#2D89EF" background-color="#F2F2F2" text-color="black"
                     :default-active="router.currentRoute.value.path">
                     <el-menu-item index="/myOneDay" class="menu_item" @click="toMyOneDay">
                         <div>
@@ -191,7 +219,7 @@ async function delListItem(pid: string) {
 
             <!-- 自定义列表 -->
             <div class="list">
-                <el-menu active-text-color="#ffd04b" background-color="#F2F2F2" text-color="black"
+                <el-menu active-text-color="#2D89EF" background-color="#F2F2F2" text-color="black"
                     :default-active="router.currentRoute.value.params.pid">
                     <el-menu-item :index="item.pid" v-for="item in menusStore.listArr" :key="item.pid"
                         @click="toList(item.pid)" class="list_item">
@@ -229,9 +257,8 @@ async function delListItem(pid: string) {
         </div>
         <!-- 列表弹出框 -->
         <el-dialog v-model="data.dialogFormVisible" title="添加列表">
-            <el-form :model="data.form" ref="formRef">
-                <el-form-item label="列表名称" label-width="100px" prop="name"
-                    :rules="{ required: true, message: '新建列表不能为空' }">
+            <el-form :model="data.form" ref="formRef" :rules="rules">
+                <el-form-item label="列表名称" label-width="100px" prop="name">
                     <el-input v-model="data.form.name" autocomplete="off" />
                 </el-form-item>
             </el-form>
@@ -282,9 +309,7 @@ body {
 
         &_input {
             :deep(.el-input) {
-                width: 90%;
-                border-bottom: 1px solid gray;
-                border-radius: 5.5%;
+                width: 96%;
             }
         }
 
@@ -327,7 +352,7 @@ body {
                     margin-bottom: 16px;
                 }
 
-                .list_item_item {
+                &_item {
                     :deep(.el-badge__content) {
                         margin-bottom: 10px;
                     }
@@ -358,7 +383,7 @@ body {
         left: 320px;
         bottom: 0;
         right: 0;
-        background-image: url('../../assets/bgmImg.webp');
+        background-color: v-bind(color);
         overflow: hidden;
         border-radius: 20px 0 0 0;
     }

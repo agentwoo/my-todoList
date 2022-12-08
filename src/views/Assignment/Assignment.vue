@@ -74,11 +74,15 @@ const addItem = () => {
         display: flex;
         justify-content: center;
         font-weight: 900;
+
+        :deep(.el-empty__description p) {
+            color: white
+        }
     }
 
     .showList {
         height: 80vh;
-        width: 90%;
+        width: 94%;
     }
 
     .addIput {
