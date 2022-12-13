@@ -7,8 +7,10 @@ declare global {
             server_date: string
             server_time: numbeer
             user: $api.$pv_user
-            tasks: $api.$dd_todo[]
-            task_cates: $api.$dd_todo_cate[]
+            tasks: $api.$dd_task[]
+            task_cates: $api.$dd_task_cate[]
         }
     }
 }
+
+export { }

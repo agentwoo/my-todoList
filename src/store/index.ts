@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import { computed, reactive, toRefs, watch } from "vue";
 import { Names } from './store-name'
-import { getNowDate } from '../utils/index'
+import { getNowDate, getTomorrow, getYesterday } from '../utils/index'
 import { nanoid } from 'nanoid'
 
 // todoList
@@ -37,18 +37,19 @@ export const useTodoListStore = defineStore(Names.TODOLIST, () => {
     // getters
     // 我的一天
     const todayTodoListCount$ = computed(() => {
-        return state.todoList.filter((v) => v.today).length
+        return state.todoList.filter((v) => v.today && v.updateTime === getNowDate()).length
     })
     const todayTodoListAndUnfinished$ = computed(() => {
-        return state.todoList.filter((v) => v.today && !v.finished)
+        return state.todoList.filter((v) => v.today && !v.finished && v.updateTime === getNowDate())
     })
     const todayTodoListAndFinished$ = computed(() => {
-        return state.todoList.filter((v) => v.today && v.finished)
+        return state.todoList.filter((v) => v.today && v.finished && v.updateTime === getNowDate())
     })
+
 
     // 用于任务列表中判断是否展示列表
     const todoListCount$ = computed(() => {
-        return state.todoList.filter(v => v.pid === '').length
+        return state.todoList.filter((v) => v.pid === '').length
     })
     // 未完成事项
     const unfinishedTodoList$ = computed(() => {
@@ -62,6 +63,7 @@ export const useTodoListStore = defineStore(Names.TODOLIST, () => {
     const significantAndUnfinished$ = computed(() => {
         return state.todoList.filter((v) => v.significant && !v.finished)
     })
+
 
     // 计划内
     const plan$ = computed(() => {
@@ -95,7 +97,7 @@ export const useTodoListStore = defineStore(Names.TODOLIST, () => {
         let deadLineArr: number[] = []
 
         // 过滤出含有截止日期的数据
-        let haveDeadLineArr = state.todoList.filter(v => v.deadLine)
+        let haveDeadLineArr = state.todoList.filter((v) => v.deadLine)
         haveDeadLineArr.forEach((item: ItodoList) => {
             let timeStamp = Date.parse(item.deadLine)
             if (timeStamp < todayOStamp) {//今天之前
@@ -155,7 +157,7 @@ export const useTodoListStore = defineStore(Names.TODOLIST, () => {
             desc: '',
             deadLine: deadLine,
             createTime: getNowDate(),
-            updateTime: '',
+            updateTime: getNowDate(),
             today: today,
             pid: pid,
             definieListName: definieListName
@@ -308,22 +310,21 @@ export const useMenusStore = defineStore(Names.MENUS, () => {
 
 // 用户信息
 interface IUserInfo {
-    user_id: number;
+    create_time: string;
+    email: string;
+    head_img_url: string;
+    mobile: string;
+    password: string;
+    update_time: string;
+    user_id: string;
     user_name: string;
     user_remark: string;
-    mobile: number;
-    password: string;
-    head_img_url: string;
-    create_time: string;
-    update_time: string;
-
 }
 export const useUserStore = defineStore(Names.USER, () => {
     const state = reactive({
         userImg: 'http://mms1.baidu.com/it/u=675116665,1307545876&fm=253&app=138&f=JPEG&fmt=auto&q=75?w=500&h=500',
-        userInfo: [] as [] | IUserInfo[]
+        userInfo: window?.G?.user || {}
     })
-
 
     return {
         ...toRefs(state)

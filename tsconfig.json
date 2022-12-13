@@ -14,7 +14,15 @@
       "DOM"
     ],
     "skipLibCheck": true,
-    "noEmit": true
+    "noEmit": true,
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ],
+      "#/*": [
+        "./typings/*"
+      ],
+    }
   },
   "include": [
     "./src/**/*.ts",

@@ -61,20 +61,16 @@ const editItem = (item: ItodoList) => {
 
 // 待办事项验证规则
 const validateText = (rule: any, value: string, callback: any) => {
-    // const v = value.trim()
-    // if (!v) return callback("待办项不能为空")
-    // if (data.currentItem?.text === v) return callback()
-    // let isExist = todoListStore.todoList.some((i: { text: string; }) => i.text === v)
-    // return callback(isExist ? '该待办项已存在' : undefined)
-
     const v = value.trim()
     if (!v) return callback("待办项不能为空")
+    if (v.length >= 40) return callback("待办项不能超过40个字")
     if (data.currentItem?.text === v) return callback()
     return callback()
 }
 
 const rules = reactive({
-    text: [{ validator: validateText }]
+    text: [{ validator: validateText }],
+    desc: [{ max: 40, message: '备注长度不能超过40个字' }]
 })
 
 // 确定修改
@@ -102,22 +98,26 @@ async function confirmEdit() {
         }">
             <div>
                 <el-checkbox v-model="item.finished" />
-                {{ item.text }}
+                <sapn style="margin-left:8px">{{ item.text }}</sapn>
             </div>
             <!-- 所属列表、截止日期 -->
             <div style="font-size: 8px;">
-                <div style="margin-right:8px">
-                    <template v-if="(!item.pid && !item.today)">
+                <div>
+                    <span v-if="(!item.pid && !item.today && router.currentRoute.value.path !== '/assignment')"
+                        style="margin-right:8px">
                         任务
-                    </template>
-                    <template v-if="(item.today && router.currentRoute.value.path !== '/myOneDay')">
+                    </span>
+                    <span
+                        v-if="(item.today && item.updateTime === getNowDate() && router.currentRoute.value.path !== '/myOneDay')"
+                        style="margin-right:8px">
                         我的一天
-                    </template>
-                    <template
+                    </span>
+                    <span
                         v-if="item.pid && (router.currentRoute.value.path === '/myOneDay'
-                        || router.currentRoute.value.path === '/significant' || router.currentRoute.value.path === '/plan')">
+                        || router.currentRoute.value.path === '/significant' || router.currentRoute.value.path === '/plan')"
+                        style="margin-right:8px">
                         {{ item.definieListName }}
-                    </template>
+                    </span>
                 </div>
                 <div v-show="item.deadLine">
                     <template v-if="item.deadLine === getYesterday()">
@@ -147,10 +147,10 @@ async function confirmEdit() {
             <el-button text :icon="Edit" @click="editItem(item)" v-show="!item.finished">修改</el-button>
             <el-button text :icon="Delete" @click="delItem(item)">删除</el-button>
             <div @click="item.significant = !item.significant">
-                <el-icon v-if="!item.significant">
+                <el-icon v-if="!item.significant" style="margin-top:6px">
                     <Star />
                 </el-icon>
-                <el-icon v-else>
+                <el-icon v-else style="margin-top:6px">
                     <StarFilled />
                 </el-icon>
             </div>

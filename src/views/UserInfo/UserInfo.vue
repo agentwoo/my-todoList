@@ -8,17 +8,17 @@ const userStore = useUserStore()
 interface IuserInfo {
     img: string;
     userName: string;
-    userRemark: string;
-    mobile: string;
-    passWord: number;
+    // userRemark: string;
+    // mobile: string;
+    passWord: string;
 }
 
 const userInfo = reactive<IuserInfo>({
     img: userStore.userImg,
-    userName: '张三',
-    userRemark: 'hello',
-    mobile: "123465",
-    passWord: 123456
+    userName: userStore.userInfo.user_name,
+    // userRemark: userStore.userInfo.user_remark,
+    // mobile: userStore.userInfo.mobile,
+    passWord: userStore.userInfo.password
 })
 
 const formRef = ref()
@@ -28,6 +28,7 @@ const rules = reactive({
     mobile: [{ required: true, message: '密码不能为空', trigger: 'blur' }],
     passWord: [{ required: true, message: '密码不能为空', trigger: 'blur' }],
 })
+
 
 
 </script>
@@ -40,12 +41,12 @@ const rules = reactive({
                 <el-form-item label="名称:" prop="userName">
                     <el-input type="text" v-model="userInfo.userName" autocomplete="off" />
                 </el-form-item>
-                <el-form-item label="备注:" prop="userRemark">
+                <!-- <el-form-item label="备注:" prop="userRemark">
                     <el-input type="text" v-model="userInfo.userRemark" autocomplete="off" />
                 </el-form-item>
                 <el-form-item label="手机:" prop="mobile">
                     <el-input type="text" v-model="userInfo.mobile" autocomplete="off" />
-                </el-form-item>
+                </el-form-item> -->
                 <el-form-item label="密码:" prop="passWord">
                     <el-input type="password" v-model="userInfo.passWord" autocomplete="off" />
                 </el-form-item>

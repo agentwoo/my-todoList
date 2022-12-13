@@ -14,7 +14,8 @@ const routes: Array<RouteRecordRaw> = [
             { path: 'list/:pid', name: 'List', component: () => import('../views/DefineList/DefineList.vue') }
         ]
     },
-    { path: '/login', component: () => import('../views/Login/Login.vue') }
+    { path: '/login', component: () => import('../views/Login/Login.vue') },
+    { path: '/register', component: () => import('@/views/Login/Register.vue') }
 ]
 
 const router = createRouter({

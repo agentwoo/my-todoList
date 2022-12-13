@@ -5,6 +5,7 @@ import { Search, Delete } from '@element-plus/icons-vue'
 import { useTodoListStore, useUserStore, useMenusStore } from '../../store/index'
 import { delDialog, errMessage, successMessage } from '../../utils/index'
 import { useRouter } from 'vue-router'
+import { appendFile } from 'fs'
 
 const todoListStore = useTodoListStore()
 const userStore = useUserStore()
@@ -296,11 +297,12 @@ body {
         padding-left: 20px;
         padding: 10px;
 
-        div {
-            margin-bottom: 10px;
-        }
-
         &_user {
+
+            div {
+                margin-bottom: 10px;
+            }
+
             img {
                 height: 60px;
                 border-radius: 50%;
@@ -330,8 +332,9 @@ body {
             }
         }
 
+
         .list {
-            height: calc(100vh - 440px);
+            height: calc(100vh - 400px);
             overflow-y: scroll;
 
             :deep(.el-menu) {
@@ -346,15 +349,16 @@ body {
                 display: flex;
                 justify-content: space-between;
 
+
                 :deep(.el-button) {
                     width: 30px;
                     height: 30px;
-                    margin-bottom: 16px;
+                    margin-bottom: 11px;
                 }
 
                 &_item {
                     :deep(.el-badge__content) {
-                        margin-bottom: 10px;
+                        margin-bottom: 16px;
                     }
                 }
 
@@ -364,6 +368,7 @@ body {
             }
 
         }
+
 
         .createList {
             position: absolute;

@@ -17,7 +17,6 @@ app.use(router);
 
 // console.log($api);
 
-
 const store = createPinia()
 app.use(store)
 
