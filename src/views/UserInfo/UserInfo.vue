@@ -1,90 +1,97 @@
-<!-- 用户信息 -->
+<!-- 个人信息 -->
 <script lang='ts' setup>
 import { reactive, toRefs, ref } from 'vue'
-import { useUserStore } from '../../store/index'
+import { useUserStore } from '@/store';
+import { delDialog, successMessage } from '@/utils/index'
+import { useRouter } from 'vue-router';
 
 const userStore = useUserStore()
+const router = useRouter()
 
-interface IuserInfo {
-    img: string;
-    userName: string;
-    // userRemark: string;
-    // mobile: string;
-    passWord: string;
+const radio = ref(3)
+
+// 退出登录
+async function logout() {
+    let res = await delDialog("确定退出登录", "提示")
+    if (res) {
+        let resLogout = await $api.pv.logout()
+        if (resLogout.ok) {
+            successMessage('退出登录成功！')
+            router.replace({
+                path: '/login'
+            })
+        }
+    }
 }
-
-const userInfo = reactive<IuserInfo>({
-    img: userStore.userImg,
-    userName: userStore.userInfo.user_name,
-    // userRemark: userStore.userInfo.user_remark,
-    // mobile: userStore.userInfo.mobile,
-    passWord: userStore.userInfo.password
-})
-
-const formRef = ref()
-const rules = reactive({
-    userName: [{ required: true, message: '名称不能为空', trigger: 'blur' }],
-    userRemark: [{ required: true, message: '备注不能为空', trigger: 'blur' }],
-    mobile: [{ required: true, message: '密码不能为空', trigger: 'blur' }],
-    passWord: [{ required: true, message: '密码不能为空', trigger: 'blur' }],
-})
-
-
-
 </script>
 
 <template>
-    <div class="userInfo">
-        <div class="userInfo_container">
-            <el-form label-width="80px" class="userInfoForm" ref="formRef" :rules="rules">
-                <img :src="userInfo.img" alt="用户头像">
-                <el-form-item label="名称:" prop="userName">
-                    <el-input type="text" v-model="userInfo.userName" autocomplete="off" />
-                </el-form-item>
-                <!-- <el-form-item label="备注:" prop="userRemark">
-                    <el-input type="text" v-model="userInfo.userRemark" autocomplete="off" />
-                </el-form-item>
-                <el-form-item label="手机:" prop="mobile">
-                    <el-input type="text" v-model="userInfo.mobile" autocomplete="off" />
-                </el-form-item> -->
-                <el-form-item label="密码:" prop="passWord">
-                    <el-input type="password" v-model="userInfo.passWord" autocomplete="off" />
-                </el-form-item>
-                <el-form-item>
-                    <el-button type="primary" class="editBtn">确定修改</el-button>
-                </el-form-item>
-            </el-form>
+    <div class="container">
+        <div class="container-inner">
+            <div class="userInfo">
+                <img :src="userStore.userInfo.head_img_url" alt="用户头像">
+                <div class="userInfo-item">
+                    <div>{{ userStore.userInfo.user_name }}</div>
+                    <div>{{ userStore.userInfo.email }}</div>
+                </div>
+            </div>
+            <div>
+                <el-button @click="logout">退出登录</el-button>
+            </div>
+        </div>
+        <div class="container-theme">
+            <div class="container-theme-title">主题</div>
+            <div>
+                <el-radio-group v-model="radio">
+                    <el-radio :label="3">深色主题</el-radio>
+                    <el-radio :label="6">浅色主题</el-radio>
+                </el-radio-group>
+            </div>
         </div>
     </div>
 </template>
 
 <style lang='scss' scoped>
-.userInfo {
+.container {
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    align-items: center;
 
-    &_container {
-        margin-top: 10%;
-        width: 300px;
-        border-radius: 20px;
-        background-color: white;
+    &-inner {
+        width: 600px;
+        padding: 60px 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid gray;
 
-        .userInfoForm {
-            width: 250px;
+        .userInfo {
+            display: flex;
 
             img {
-                width: 60px;
-                height: 60px;
                 border-radius: 50%;
-                margin-left: 50%;
+                width: 80px;
             }
 
-            .editBtn {
-                width: 100%;
+            &-item {
+                margin-top: 10px;
+                margin-left: 5px;
+
+                div:nth-child(1) {
+                    font-size: 30px;
+                }
             }
         }
+    }
 
+    &-theme {
+        padding: 40px 0;
+        margin-right: 400px;
 
+        &-title {
+            font-size: 40px;
+            padding-bottom: 20px;
+        }
     }
 }
 </style>

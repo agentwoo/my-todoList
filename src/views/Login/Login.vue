@@ -2,17 +2,17 @@
 <script setup lang="ts">
 import { reactive, toRefs, ref } from 'vue'
 import router from '../../router';
-import { useUserStore } from '../../store/index'
 import { createAesEncryption } from '@/utils/cipher'
 import { errMessage, successMessage } from '@/utils';
+import { useMenusStore, useTodoListStore, useUserStore } from '@/store'
 
 // 加密对象
 const Aes = createAesEncryption({ key: 'abcdefgabcdefg12' })
 
 const data = reactive({
     loginForm: {
-        email: '',
-        passWord: ''
+        email: 'test2@qq.com',
+        passWord: '123456'
     },
     rules: {
         email: [
@@ -27,7 +27,6 @@ const data = reactive({
 })
 
 const loginFormRef = ref()
-const userStore = useUserStore()
 async function submitForm() {
     const $form = loginFormRef.value
     if (!$form) return
@@ -39,14 +38,13 @@ async function submitForm() {
         email: Aes.encryptByAES(data.loginForm.email.trim()),
         password: Aes.encryptByAES(data.loginForm.passWord.trim())
     })
-
-    // console.log(res);
-
     if (res.ok) {
         router.push('/myOneDay')
         successMessage('登录成功')
 
-        console.log(res);
+        useTodoListStore().testTodo = res.data.tasks
+        useMenusStore().testMenus = res.data.task_cates
+        useUserStore().userInfo = res.data.user
 
         data.loginForm.email = ''
         data.loginForm.passWord = ''

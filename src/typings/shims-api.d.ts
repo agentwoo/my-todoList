@@ -81,6 +81,9 @@ declare namespace $api.dd.task {
         /** 用户编码 */ user_id: string;
         /** 列表编码 */ task_cate_id?: string;
         /** 任务名称 */ task_name: string;
+        /** 是否重要 */ is_important?: number;
+        /** 我的一天 */ myday?: string;
+        /** 截止日期 */ closing_date?: string;
     }, opt?: Option): Response<$dd_task>;
 
     /** 删除任务 */

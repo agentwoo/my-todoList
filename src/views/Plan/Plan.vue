@@ -5,19 +5,26 @@ import { Plus } from '@element-plus/icons-vue'
 import { useTodoListStore } from '../../store/index'
 import ScrollBar from '../../components/scrollbar/index.vue'
 import { getNowDate, errMessage, successMessage } from '../../utils'
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
 const todoListStore = useTodoListStore()
 const data = reactive({
     inputVal: '',
 })
 
 //添加
-const addItem = () => {
-    const result = todoListStore.addItem(data.inputVal, false, false, getNowDate(), '', '')
-    if (result === 0) {
-        errMessage("输入不能为空！")
-    } else {
-        successMessage('添加成功！')
+async function addItem() {
+    let task_cate_id = router.currentRoute.value.path
+    const res = await todoListStore.addItem(
+        {
+            user_id: window.G.user.user_id,
+            task_cate_id: task_cate_id,
+            task_name: data.inputVal,
+            closing_date: getNowDate()
+        })
+    if (res.ok) {
+        successMessage('添加成功！！')
     }
     data.inputVal = ''
 }

@@ -76,7 +76,7 @@ async function submitForm() {
     <div class="login-box">
         <el-form ref="registerFormRef" :model="data.registerForm" status-icon :rules="data.rules" label-width="90px"
             class="loginForm">
-            <h2>todoList注册</h2>
+            <h2>注册</h2>
             <el-form-item label="昵称:" prop="userName">
                 <el-input v-model="data.registerForm.userName" autocomplete="off" />
             </el-form-item>
@@ -92,6 +92,7 @@ async function submitForm() {
             <el-form-item>
                 <el-button type="primary" @click="submitForm()" class="sub-btn">注册</el-button>
             </el-form-item>
+            <RouterLink to="/login" class="link">已有账号，点击登录</RouterLink>
         </el-form>
     </div>
 </template>
@@ -116,6 +117,11 @@ async function submitForm() {
 
         .sub-btn {
             width: 100%;
+        }
+
+        .link {
+            margin-left: 205px;
+            text-decoration: none;
         }
     }
 }

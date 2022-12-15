@@ -15,24 +15,30 @@ const data = reactive({
     inputVal: '',
     item: {
         name: '',
-        pid: ''
+        id: ''
     }
 })
 
 watch(() => route.params, newVal => {
-    menusStore.pid = newVal.pid as string
-    const item = menusStore.listArr.find((v) => v.pid === newVal.pid)
-    if (item) data.item = item
+    const item = menusStore.testMenus.find((v) => v.task_cate_id === newVal.id)
+    if (item) {
+        data.item.name = item.task_cate_name
+        useMenusStore().paramsId = item.task_cate_id
+        data.item.id = item.task_cate_id
+    }
 }, {
     immediate: true
 })
 
-const addItem = () => {
-    const result = todoListStore.addItem(data.inputVal, false, false, '', data.item.pid, data.item.name)
-    if (result === 0) {
-        errMessage("输入不能为空！")
-    } else {
-        successMessage('添加成功！')
+async function addItem() {
+    const res = await todoListStore.addItem(
+        {
+            user_id: window.G.user.user_id,
+            task_cate_id: data.item.id,
+            task_name: data.inputVal
+        })
+    if (res.ok) {
+        successMessage('添加成功！！')
     }
     data.inputVal = ''
 }

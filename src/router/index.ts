@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
 
 const routes: Array<RouteRecordRaw> = [
-    { path: '/', redirect: '/myOneDay' },
+    { path: '/', redirect: '/login' },
     {
         path: '/', component: () => import('../views/HomePage/HomePage.vue'),
         children: [
@@ -11,7 +11,11 @@ const routes: Array<RouteRecordRaw> = [
             { path: 'plan', component: () => import('../views/Plan/Plan.vue') },
             { path: 'userInfo', component: () => import('../views/UserInfo/UserInfo.vue') },
             { path: 'search', component: () => import('../views/SearchPage/SearchPage.vue') },
-            { path: 'list/:pid', name: 'List', component: () => import('../views/DefineList/DefineList.vue') }
+
+            // { path: 'list/:pid', name: 'List', component: () => import('../views/DefineList/DefineList.vue') },
+
+
+            { path: 'taskList/:id', name: 'taskList', component: () => import('../views/DefineList/DefineList.vue') }
         ]
     },
     { path: '/login', component: () => import('../views/Login/Login.vue') },
