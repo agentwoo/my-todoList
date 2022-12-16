@@ -1,6 +1,6 @@
 <!-- 首页 -->
 <script lang='ts' setup>
-import { reactive, toRefs, ref, watch } from 'vue'
+import { reactive, toRefs, ref, watch, computed } from 'vue'
 import { Search, Delete, Plus } from '@element-plus/icons-vue'
 import { useTodoListStore, useUserStore, useMenusStore } from '../../store/index'
 import { delDialog, errMessage, successMessage } from '../../utils/index'
@@ -33,8 +33,7 @@ watch(() => router.currentRoute.value.path, newVal => {
 // 查询待办事项
 const search = () => {
     let res = todoListStore.searchItem(todoListStore.searchVal)
-    if (res === 0)
-        return errMessage('输入不能为空')
+    if (res === 0) return errMessage('输入不能为空')
     if (res === 1) {
         todoListStore.searchRes = []
         router.push({ path: '/search' })
@@ -54,72 +53,53 @@ const UserInfo = () => {
     })
 }
 
-// 退出登录
-async function logout() {
-    let res = await delDialog("确定退出登录", "提示")
-    if (res) {
-        let resLogout = await $api.pv.logout()
-        if (resLogout.ok) {
-            successMessage('退出登录成功！')
-            router.replace({
-                path: '/login'
-            })
+const menus = computed(() => {
+    return [
+        {
+            path: '/myOneDay', icon: 'Sunny', title: '我的一天',
+            store: todoListStore.todayTodoListAndUnfinished$.length
+        },
+        {
+            path: '/significant', icon: 'Star', title: '重要',
+            store: todoListStore.significantAndUnfinished$.length
+        },
+        {
+            path: '/plan', icon: 'Tickets', title: '计划内',
+            store: todoListStore.plan$.haveDeadLineArrAndUnFinishedCount
+        },
+        {
+            path: '/assignment', icon: 'House', title: '任务',
+            store: todoListStore.unfinishedTodoList$.length
         }
-    }
-}
-
-
-const toMyOneDay = () => {
-    router.push({
-        path: '/myOneDay'
-    })
-}
-
-const toAssignment = () => {
-    router.push({
-        path: '/assignment'
-    })
-}
-
-const toSignificant = () => {
-    router.push({
-        path: '/significant'
-    })
-}
-
-const toPlan = () => {
-    router.push({
-        path: '/plan'
-    })
-}
-
+    ]
+})
 
 // 添加列表
 const data = reactive({
     dialogFormVisible: false,
     form: {
-        name: '无标题列表'
+        name: ''
     },
     dialogGroup: false,
     groupForm: {
-        name: '新建分组'
+        name: ''
     },
     dialogGroupTask: false,
     groupTaskForm: {
-        name: '新建列表'
+        name: ''
     }
 })
 
+const rules = reactive({
+    name: [
+        { required: true, message: '输入不能为空', trigger: 'blur' },
+        { min: 1, max: 10, message: '输入不能超过10个字' }
+    ]
+})
 // 新建列表
 const addList = () => {
     data.dialogFormVisible = true
 }
-const rules = reactive({
-    name: [
-        { required: true, message: '新建列表不能为空' },
-        { min: 1, max: 10, message: '列表名称不能超过10个字' }
-    ]
-})
 let formRef = ref()
 async function confirmAddList() {
     const $form = formRef.value
@@ -138,24 +118,16 @@ async function confirmAddList() {
     if (!res.ok) return
     useMenusStore().testMenus.push(res.data)
 
-
     data.dialogFormVisible = false
+    data.form.name = ''
     successMessage('列表添加成功')
 }
-
-
 
 // 新建分组
 const addGroup = () => {
     data.dialogGroup = true
 }
 let groupformRef = ref()
-const groupRules = reactive({
-    name: [
-        { required: true, message: '新建列表不能为空' },
-        { min: 1, max: 10, message: '列表名称不能超过10个字' }
-    ]
-})
 async function confirmAddGroup() {
     const $form = groupformRef.value
     if (!$form) return
@@ -174,6 +146,7 @@ async function confirmAddGroup() {
     useMenusStore().testMenus.push(res.data)
 
     data.dialogGroup = false
+    data.groupForm.name = ''
     successMessage('分组添加成功')
 }
 
@@ -182,16 +155,8 @@ async function confirmAddGroup() {
 const addGroupTask = (id: string) => {
     data.dialogGroupTask = true
     useMenusStore().taskCaseid = id
-
 }
 let groupTaskFormRef = ref()
-const groupTaskRules = reactive({
-    name: [
-        { required: true, message: '分组名不能为空' },
-        { min: 1, max: 10, message: '分组名称不能超过10个字' }
-    ]
-})
-
 async function confirmAddGroupTask() {
     const $form = groupTaskFormRef.value
     if (!$form) return
@@ -210,6 +175,7 @@ async function confirmAddGroupTask() {
     useMenusStore().testMenus.push(res.data)
 
     data.dialogGroupTask = false
+    data.groupTaskForm.name = ''
     successMessage('列表添加成功')
 }
 
@@ -232,7 +198,47 @@ async function delTask(taskCateId: string) {
     router.push('/myOneDay')
 }
 
+// 删除列表分组
+async function delTaskGroup(taskCateId: string) {
+    let delListTitle = useMenusStore().testMenus.find(v => v.task_cate_id === taskCateId)?.task_cate_name
+    let result = await delDialog(`将永久删除"${delListTitle}"`, "删除分组")
+    if (!result) return
 
+    // 删除分组
+    let res = await $api.dd.task_cate.del({ user_id: window.G.user.user_id, task_cate_id: taskCateId })
+    if (!res.ok) return
+
+    let index = useMenusStore().testMenus.findIndex(v => v.task_cate_id === taskCateId)
+    if (index === -1) return
+    useMenusStore().testMenus.splice(index, 1)
+
+    // 删除子列表
+    let groupList = useMenusStore().testMenus.filter(v => v.task_cate_pid === taskCateId)
+    if (groupList.length === 0) return
+    // console.log('groupList', groupList);
+
+    for (let i = groupList.length - 1; i > -1; i--) {
+        if (groupList[i].task_cate_pid === taskCateId) {
+            // let index = useMenusStore().testMenus.findIndex(v => v.task_cate_id === groupList[i].task_cate_id)
+            // useMenusStore().testMenus.splice(index, 1)
+            useMenusStore().testMenus.splice(i, 1)
+
+            console.log(index);
+
+            let res = await $api.dd.task_cate.del(
+                {
+                    user_id: window.G.user.user_id,
+                    task_cate_id: groupList[i].task_cate_id
+                })
+            if (!res.ok) return
+            // for (let i = useTodoListStore().testTodo.length - 1; i > -1; i--) {
+            //     if (useTodoListStore().testTodo[i].task_cate_id === groupList[i].task_cate_id) {
+            //         useTodoListStore().testTodo.splice(i, 1)
+            //     }
+            // }
+        }
+    }
+}
 
 </script>
 
@@ -252,7 +258,7 @@ async function delTask(taskCateId: string) {
                     <template #dropdown>
                         <el-dropdown-menu>
                             <el-dropdown-item @click="UserInfo">个人中心</el-dropdown-item>
-                            <el-dropdown-item @click="logout">退出登录</el-dropdown-item>
+                            <el-dropdown-item @click=userStore.logout()>退出登录</el-dropdown-item>
                         </el-dropdown-menu>
                     </template>
                 </el-dropdown>
@@ -270,65 +276,30 @@ async function delTask(taskCateId: string) {
             <!-- 菜单 -->
             <div class="homePage_aside_menu">
                 <el-menu active-text-color="#2D89EF" background-color="#F2F2F2" text-color="black"
-                    :default-active="router.currentRoute.value.path">
-                    <el-menu-item index="/myOneDay" class="menu_item" @click="toMyOneDay">
+                    :default-active="router.currentRoute.value.path" router>
+                    <el-menu-item :index="item.path" class="menu_item" v-for="item in menus">
                         <div>
                             <el-icon>
-                                <Sunny />
+                                <component :is="item.icon"></component>
                             </el-icon>
-                            我的一天
+                            <span>{{ item.title }}</span>
                         </div>
-                        <el-badge :value="todoListStore.todayTodoListAndUnfinished$.length"
-                            v-show="todoListStore.todayTodoListAndUnfinished$.length" class="item" type="info">
-                        </el-badge>
-                    </el-menu-item>
-                    <el-menu-item index="/significant" class="menu_item" @click="toSignificant">
-                        <div>
-                            <el-icon>
-                                <Star />
-                            </el-icon>
-                            重要
-                        </div>
-                        <el-badge :value="todoListStore.significantAndUnfinished$.length"
-                            v-show="todoListStore.significantAndUnfinished$.length" class="item" type="info">
-                        </el-badge>
-                    </el-menu-item>
-                    <el-menu-item index="/plan" class="menu_item" @click="toPlan">
-                        <div>
-                            <el-icon>
-                                <Tickets />
-                            </el-icon>
-                            计划内
-                        </div>
-                        <el-badge :value="todoListStore.plan$.haveDeadLineArrAndUnFinishedCount"
-                            v-show="todoListStore.plan$.haveDeadLineArrAndUnFinishedCount" class="item" type="info">
-                        </el-badge>
-                    </el-menu-item>
-                    <el-menu-item index="/assignment" class="menu_item" @click="toAssignment">
-                        <div>
-                            <el-icon>
-                                <Sunny />
-                            </el-icon>
-                            任务
-                        </div>
-                        <el-badge :value="todoListStore.unfinishedTodoList$.length"
-                            v-show="todoListStore.unfinishedTodoList$.length" class="item" type="info">
+                        <el-badge :value="item.store" v-show="item.store" class="item" type="info">
                         </el-badge>
                     </el-menu-item>
                 </el-menu>
             </div>
-
-
             <!-- 自定义列表分组 -->
             <div class="defineList">
-                <el-menu active-text-color="#2D89EF" background-color="#F2F2F2" text-color="black">
+                <el-menu active-text-color="#2D89EF" background-color="#F2F2F2" text-color="black"
+                    :default-active="router.currentRoute.value.params.id">
                     <el-menu-item :index="item.task_cate_id" v-for="item in useMenusStore().taskList()"
                         class="list_item" @click="toTaskList(item.task_cate_id)">
                         <div>
                             <el-icon>
                                 <Box />
                             </el-icon>
-                            <span>{{ item.task_cate_name }}</span>
+                            <span style="margin-left:6px">{{ item.task_cate_name }}</span>
                         </div>
                         <div>
                             <el-button type="danger" :icon="Delete" @click="delTask(item.task_cate_id)" circle
@@ -343,35 +314,42 @@ async function delTask(taskCateId: string) {
                 </el-menu>
 
                 <el-menu active-text-color="#2D89EF" background-color="#F2F2F2" class="el-menu-vertical-demo"
-                    :default-active="router.currentRoute.value.path" text-color="black"
+                    :default-active="router.currentRoute.value.params.id" text-color="black"
                     v-for="item in useMenusStore().getTaskCase()">
                     <el-sub-menu :index="item.task_cate_id">
                         <template #title>
                             <div class="list_item">
                                 <div>
                                     <el-icon>
-                                        <location />
+                                        <Memo />
                                     </el-icon>
-                                    <span>{{ item.task_cate_name }}</span>
+                                    <span style="margin-left:6px">{{ item.task_cate_name }}</span>
                                 </div>
                                 <div>
                                     <el-button type="danger" text :icon="Plus" circle
                                         style="position: absolute;left: 210px;top:10px;"
                                         @click="addGroupTask(item.task_cate_id)" />
+                                    <el-button type="danger" text :icon="Delete" circle
+                                        style="position: absolute;left: 170px;top:10px;"
+                                        @click="delTaskGroup(item.task_cate_id)" />
                                 </div>
                             </div>
                         </template>
                         <el-menu-item-group>
                             <el-menu-item :index="subMenu.task_cate_id" v-for="subMenu in item.children"
                                 @click="toTaskList(subMenu.task_cate_id)">
-                                {{ subMenu.task_cate_name }}
+                                <el-icon>
+                                    <Box />
+                                </el-icon>
+                                <span style="margin-left:6px">{{ subMenu.task_cate_name }}</span>
+                                <el-button type="danger" text :icon="Delete" circle
+                                    style="position: absolute;left: 210px;top:10px;"
+                                    @click="delTask(subMenu.task_cate_id)" />
                             </el-menu-item>
                         </el-menu-item-group>
                     </el-sub-menu>
                 </el-menu>
             </div>
-
-
             <!-- 新建列表、分组 -->
             <div class="createListAndGroup">
                 <div class="createList">
@@ -409,8 +387,8 @@ async function delTask(taskCateId: string) {
         </el-dialog>
         <!-- 新建分组 -->
         <el-dialog v-model="data.dialogGroup" title="新建分组">
-            <el-form :model="data.groupForm" ref="groupformRef" :rules="groupRules">
-                <el-form-item label="列表名称" label-width="100px" prop="name">
+            <el-form :model="data.groupForm" ref="groupformRef" :rules="rules">
+                <el-form-item label="分组名称" label-width="100px" prop="name">
                     <el-input v-model="data.groupForm.name" autocomplete="off" />
                 </el-form-item>
             </el-form>
@@ -425,7 +403,7 @@ async function delTask(taskCateId: string) {
         </el-dialog>
         <!-- 新建分组列表 -->
         <el-dialog v-model="data.dialogGroupTask" title="新建分组">
-            <el-form :model="data.groupTaskForm" ref="groupTaskFormRef" :rules="groupTaskRules">
+            <el-form :model="data.groupTaskForm" ref="groupTaskFormRef" :rules="rules">
                 <el-form-item label="列表名称" label-width="100px" prop="name">
                     <el-input v-model="data.groupTaskForm.name" autocomplete="off" />
                 </el-form-item>

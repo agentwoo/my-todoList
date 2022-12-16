@@ -28,11 +28,9 @@ defineProps<Props>()
 async function delItem(item: $api.$dd_task) {
     let opt = await delDialog("是否删除待办事项", "提示")
     if (!opt) return errMessage('取消删除')
-
-    const res = await $api.dd.task.del({ user_id: window.G.user.user_id, task_id: item.task_id })
-    if (!res.ok) return
-
-    todoListStore.delItem(item)
+    let res = await todoListStore.delItem(item)
+    if (!res) return
+    res.ok ? successMessage('删除成功') : errMessage(res.err)
 }
 
 // 修改
@@ -121,7 +119,8 @@ async function isFinished(item: $api.$dd_task) {
             <!-- 所属列表、截止日期 -->
             <div style="font-size: 8px;">
                 <div>
-                    <span v-if="(item.myday === '1900-01-01' && router.currentRoute.value.path !== '/assignment')"
+                    <span v-if="(item.myday === '1900-01-01' &&
+                    (router.currentRoute.value.path === '/significant' || router.currentRoute.value.path === '/plan'))"
                         style="margin-right:8px">
                         任务
                     </span>
@@ -129,33 +128,22 @@ async function isFinished(item: $api.$dd_task) {
                         style="margin-right:8px">
                         我的一天
                     </span>
-                    <span v-if="(
-                        item.task_cate_id !== '/myOneDay'
-                        && item.task_cate_id !== '/significant'
-                        && item.task_cate_id !== '/plan'
-                        && item.task_cate_id !== '/assignment'
-                    )" style="margin-right:8px">
-                        {{ item.task_name }}
-                    </span>
                 </div>
                 <div v-show="item.closing_date !== '1900-01-01'">
-                    <template v-if="item.closing_date === getYesterday()">
-                        <span style="color:red">截止日期:昨天</span>
-                    </template>
-                    <template v-else-if="item.closing_date === getNowDate()">
-                        <div style="color:#005FB8">
-                            截止日期: 今天
-                        </div>
-                    </template>
-                    <template v-else-if="item.closing_date === getTomorrow()">
+                    <span v-if="item.closing_date === getYesterday()" style="color:red">
+                        截止日期:昨天
+                    </span>
+                    <span v-else-if="item.closing_date === getNowDate()" style="color:#005FB8">
+                        截止日期: 今天
+                    </span>
+                    <span v-else-if="item.closing_date === getTomorrow()">
                         截止日期: 明天
-                    </template>
-                    <template v-else>
-                        <div
-                            :style="{ color: Date.parse(item.closing_date) < Date.parse(getNowDate()) ? ' red' : 'black' }">
-                            截止日期：{{ item.closing_date }}
-                        </div>
-                    </template>
+                    </span>
+                    <span v-else :style="{
+                        color: Date.parse(item.closing_date) < Date.parse(getNowDate()) ? ' red' : 'black'
+                    }">
+                        截止日期：{{ item.closing_date }}
+                    </span>
                 </div>
             </div>
             <!-- 备注 -->

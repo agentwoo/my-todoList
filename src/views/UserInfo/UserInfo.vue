@@ -2,27 +2,10 @@
 <script lang='ts' setup>
 import { reactive, toRefs, ref } from 'vue'
 import { useUserStore } from '@/store';
-import { delDialog, successMessage } from '@/utils/index'
-import { useRouter } from 'vue-router';
 
 const userStore = useUserStore()
-const router = useRouter()
-
 const radio = ref(3)
 
-// 退出登录
-async function logout() {
-    let res = await delDialog("确定退出登录", "提示")
-    if (res) {
-        let resLogout = await $api.pv.logout()
-        if (resLogout.ok) {
-            successMessage('退出登录成功！')
-            router.replace({
-                path: '/login'
-            })
-        }
-    }
-}
 </script>
 
 <template>
@@ -36,7 +19,7 @@ async function logout() {
                 </div>
             </div>
             <div>
-                <el-button @click="logout">退出登录</el-button>
+                <el-button @click=useUserStore().logout()>退出登录</el-button>
             </div>
         </div>
         <div class="container-theme">

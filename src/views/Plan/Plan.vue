@@ -40,27 +40,27 @@ async function addItem() {
         </div>
         <div v-else class="showList">
             <el-scrollbar>
-                <template v-if="todoListStore.plan$.last.length">
+                <span v-if="todoListStore.plan$.last.length">
                     先前:({{ todoListStore.plan$.last.length }})
                     <ScrollBar :finishedOrunfinished="todoListStore.plan$.last"></ScrollBar>
-                </template>
-                <template v-if="todoListStore.plan$.today.length">
+                </span>
+                <span v-if="todoListStore.plan$.today.length">
                     今天:({{ todoListStore.plan$.today.length }})
                     <ScrollBar :finishedOrunfinished="todoListStore.plan$.today"></ScrollBar>
-                </template>
-                <template v-if="todoListStore.plan$.tomorrow.length">
+                </span>
+                <span v-if="todoListStore.plan$.tomorrow.length">
                     明天:({{ todoListStore.plan$.tomorrow.length }})
                     <ScrollBar :finishedOrunfinished="todoListStore.plan$.tomorrow"></ScrollBar>
-                </template>
-                <template v-if="todoListStore.plan$.thisMonth.length">
+                </span>
+                <span v-if="todoListStore.plan$.thisMonth.length">
                     {{ todoListStore.plan$.nearDeadLine }} 至: {{ todoListStore.plan$.firstDayOfNextMonthFormat }}
                     ({{ todoListStore.plan$.thisMonth.length }})
                     <ScrollBar :finishedOrunfinished="todoListStore.plan$.thisMonth"></ScrollBar>
-                </template>
-                <template v-if="todoListStore.plan$.future.length">
+                </span>
+                <span v-if="todoListStore.plan$.future.length">
                     稍后:({{ todoListStore.plan$.future.length }})
                     <ScrollBar :finishedOrunfinished="todoListStore.plan$.future"></ScrollBar>
-                </template>
+                </span>
             </el-scrollbar>
         </div>
         <!-- 输入框 -->

@@ -12,9 +12,6 @@ const routes: Array<RouteRecordRaw> = [
             { path: 'userInfo', component: () => import('../views/UserInfo/UserInfo.vue') },
             { path: 'search', component: () => import('../views/SearchPage/SearchPage.vue') },
 
-            // { path: 'list/:pid', name: 'List', component: () => import('../views/DefineList/DefineList.vue') },
-
-
             { path: 'taskList/:id', name: 'taskList', component: () => import('../views/DefineList/DefineList.vue') }
         ]
     },

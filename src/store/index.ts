@@ -1,9 +1,8 @@
 import { defineStore } from "pinia";
-import { computed, onMounted, reactive, toRefs, watch } from "vue";
+import { computed, reactive, toRefs } from "vue";
 import { Names } from './store-name'
-import { getNowDate } from '../utils/index'
-
-
+import { getNowDate, delDialog, successMessage } from '../utils/index'
+import router from '@/router'
 
 // form--待办事项
 interface IForm {
@@ -21,6 +20,11 @@ interface IaddItem {
     is_important?: number | undefined;
     myday?: string | undefined;
     closing_date?: string | undefined;
+}
+
+interface IListUnfinishedCount {
+    num: number;
+    taskId: string;
 }
 
 const arr = {
@@ -41,6 +45,7 @@ export const useTodoListStore = defineStore(Names.TODOLIST, () => {
         searchVal: '',
         searchRes: [] as $api.$dd_task[]
     })
+
     // getters
     // 我的一天
     const todayTodoListCount$ = computed(() => {
@@ -163,11 +168,12 @@ export const useTodoListStore = defineStore(Names.TODOLIST, () => {
     }
 
     // 删除
-    function delItem(item: $api.$dd_task): boolean {
+    async function delItem(item: $api.$dd_task) {
+        const res = await $api.dd.task.del({ user_id: window.G.user.user_id, task_id: item.task_id })
+        if (!res.ok) return
         let index = state.testTodo.findIndex(v => v.task_id === item.task_id)
-        if (index === -1) return false
-        state.testTodo.splice(index, 1)
-        return true
+        if (index !== -1) state.testTodo.splice(index, 1)
+        return res
     }
 
 
@@ -229,16 +235,13 @@ interface INewMenus {
 }
 
 // 列表菜单
-interface IlistArr {
-    name: string,
-    pid: string
-}
 export const useMenusStore = defineStore(Names.MENUS, () => {
     const state = reactive({
         testMenus: (window.G.task_cates || []) as $api.$dd_task_cate[],
-        taskCaseid: '',
+        taskCaseid: '',//新建分组列表
         paramsId: '',
     })
+
 
     // 展示自定义列表中的todo
     const todoListStore = useTodoListStore()
@@ -250,18 +253,13 @@ export const useMenusStore = defineStore(Names.MENUS, () => {
         return todoListStore.testTodo.filter(v => v.task_cate_id === state.paramsId && v.is_finished === 1)
     })
 
-
-    interface IListUnfinishedCount {
-        num: number;
-        taskId: string;
-    }
     // 计算未完成数量
     const unfinishedTodo$ = computed(() => {
         let arr: IListUnfinishedCount[] = []
         state.testMenus.forEach((item: $api.$dd_task_cate) => {
-            let listItem = todoListStore.testTodo.filter((v) => v.task_cate_id === item.task_cate_id && v.is_finished === 0).length
+            let listItemCount = todoListStore.testTodo.filter(v => v.task_cate_id === item.task_cate_id && v.is_finished === 0).length
             const opt = {
-                num: listItem,
+                num: listItemCount,
                 taskId: item.task_cate_id
             }
             arr.push(opt)
@@ -313,8 +311,6 @@ export const useMenusStore = defineStore(Names.MENUS, () => {
         return state.testMenus.filter(v => v.task_cate_type === 1)
     }
 
-
-
     return {
         ...toRefs(state),
         defineListTodo$,
@@ -326,15 +322,28 @@ export const useMenusStore = defineStore(Names.MENUS, () => {
     }
 })
 
-
-
 // 用户信息
 export const useUserStore = defineStore(Names.USER, () => {
     const state = reactive({
         userInfo: window?.G?.user || {}
     })
+    // 退出登录
+    async function logout() {
+        let res = await delDialog("确定退出登录", "提示")
+        if (res) {
+            let resLogout = await $api.pv.logout()
+            if (resLogout.ok) {
+                successMessage('退出登录成功！')
+                router.replace({
+                    path: '/login'
+                })
+            }
+        }
+    }
+
     return {
         ...toRefs(state),
+        logout
     }
 
 })
