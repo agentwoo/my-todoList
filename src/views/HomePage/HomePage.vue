@@ -204,40 +204,24 @@ async function delTaskGroup(taskCateId: string) {
     let result = await delDialog(`将永久删除"${delListTitle}"`, "删除分组")
     if (!result) return
 
-    // 删除分组
-    let res = await $api.dd.task_cate.del({ user_id: window.G.user.user_id, task_cate_id: taskCateId })
-    if (!res.ok) return
-
     let index = useMenusStore().testMenus.findIndex(v => v.task_cate_id === taskCateId)
-    if (index === -1) return
-    useMenusStore().testMenus.splice(index, 1)
-
-    // 删除子列表
+    // 获取子列表
     let groupList = useMenusStore().testMenus.filter(v => v.task_cate_pid === taskCateId)
-    if (groupList.length === 0) return
-    // console.log('groupList', groupList);
-
-    for (let i = groupList.length - 1; i > -1; i--) {
-        if (groupList[i].task_cate_pid === taskCateId) {
-            // let index = useMenusStore().testMenus.findIndex(v => v.task_cate_id === groupList[i].task_cate_id)
-            // useMenusStore().testMenus.splice(index, 1)
-            useMenusStore().testMenus.splice(i, 1)
-
-            console.log(index);
-
-            let res = await $api.dd.task_cate.del(
-                {
-                    user_id: window.G.user.user_id,
-                    task_cate_id: groupList[i].task_cate_id
-                })
-            if (!res.ok) return
-            // for (let i = useTodoListStore().testTodo.length - 1; i > -1; i--) {
-            //     if (useTodoListStore().testTodo[i].task_cate_id === groupList[i].task_cate_id) {
-            //         useTodoListStore().testTodo.splice(i, 1)
-            //     }
-            // }
+    if (groupList.length === 0) {
+        let res = await $api.dd.task_cate.del({ user_id: window.G.user.user_id, task_cate_id: taskCateId })
+        if (!res.ok) return
+    } else {
+        for (let i = groupList.length - 1; i > -1; i--) {
+            await useMenusStore().delList(groupList[i].task_cate_id)
         }
+        // 删除分组
+        let res = await $api.dd.task_cate.del({ user_id: window.G.user.user_id, task_cate_id: taskCateId })
+        if (!res.ok) return
     }
+    useMenusStore().testMenus.splice(index, 1)
+    router.replace({
+        path: '/myOneDay'
+    })
 }
 
 </script>
@@ -315,7 +299,7 @@ async function delTaskGroup(taskCateId: string) {
 
                 <el-menu active-text-color="#2D89EF" background-color="#F2F2F2" class="el-menu-vertical-demo"
                     :default-active="router.currentRoute.value.params.id" text-color="black"
-                    v-for="item in useMenusStore().getTaskCase()">
+                    v-for="item in useMenusStore().getTaskCase$">
                     <el-sub-menu :index="item.task_cate_id">
                         <template #title>
                             <div class="list_item">

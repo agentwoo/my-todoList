@@ -288,7 +288,7 @@ export const useMenusStore = defineStore(Names.MENUS, () => {
     }
 
 
-    function getTaskCase() {
+    const getTaskCase$ = computed(() => {
         const newMenus: INewMenus = {}
         let taskGroup = state.testMenus.filter(v => v.task_cate_type === 0)
         for (let i = 0; i < taskGroup.length; i++) {
@@ -305,7 +305,7 @@ export const useMenusStore = defineStore(Names.MENUS, () => {
             }
         }
         return newMenus
-    }
+    })
 
     function taskList() {
         return state.testMenus.filter(v => v.task_cate_type === 1)
@@ -317,7 +317,7 @@ export const useMenusStore = defineStore(Names.MENUS, () => {
         unfinishedTodo$,
         defineListTodoAndUndefinish$,
         delList,
-        getTaskCase,
+        getTaskCase$,
         taskList
     }
 })
