@@ -5,6 +5,7 @@ import { Search, Delete, Plus } from '@element-plus/icons-vue'
 import { useTodoListStore, useUserStore, useMenusStore } from '../../store/index'
 import { delDialog, errMessage, successMessage } from '../../utils/index'
 import { useRouter } from 'vue-router'
+import imgUrl from '@/assets/pig.jpeg'
 
 const todoListStore = useTodoListStore()
 const userStore = useUserStore()
@@ -76,6 +77,7 @@ const menus = computed(() => {
 
 // 添加列表
 const data = reactive({
+    head_img: imgUrl,
     dialogFormVisible: false,
     form: {
         name: ''
@@ -223,7 +225,6 @@ async function delTaskGroup(taskCateId: string) {
         path: '/myOneDay'
     })
 }
-
 </script>
 
 <template>
@@ -231,7 +232,7 @@ async function delTaskGroup(taskCateId: string) {
         <div class="homePage_aside">
             <!-- 头像 -->
             <div class="homePage_aside_user">
-                <img :src="userStore.userInfo.head_img_url" alt="用户">
+                <img :src="userStore.userInfo.head_img_url ? userStore.userInfo.head_img_url : data.head_img" alt="用户">
                 <!-- 下拉菜单 -->
                 <el-dropdown style="margin-top:50px" size="large">
                     <span>

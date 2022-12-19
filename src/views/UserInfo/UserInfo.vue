@@ -2,9 +2,13 @@
 <script lang='ts' setup>
 import { reactive, toRefs, ref } from 'vue'
 import { useUserStore } from '@/store';
+import imgUrl from '@/assets/pig.jpeg'
 
 const userStore = useUserStore()
 const radio = ref(3)
+const data = reactive({
+    head_img: imgUrl
+})
 
 </script>
 
@@ -12,7 +16,7 @@ const radio = ref(3)
     <div class="container">
         <div class="container-inner">
             <div class="userInfo">
-                <img :src="userStore.userInfo.head_img_url" alt="用户头像">
+                <img :src="userStore.userInfo.head_img_url ? userStore.userInfo.head_img_url : data.head_img" alt="用户">
                 <div class="userInfo-item">
                     <div>{{ userStore.userInfo.user_name }}</div>
                     <div>{{ userStore.userInfo.email }}</div>
